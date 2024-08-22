@@ -1,0 +1,25 @@
+{
+  "name": "geant4-macro-extension",
+  "displayName": "Geant4 Macro Extension",
+  "description": "Syntax highlighting and auto-complete for Geant4 macro files",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.92.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "contributes": {
+    "languages": [{
+      "id": "g4macro",
+      "aliases": ["Geant4 Macro", "g4macro"],
+      "extensions": [".mac"],
+      "configuration": "./language-configuration.json"
+    }],
+    "grammars": [{
+      "language": "g4macro",
+      "scopeName": "source.g4macro",
+      "path": "./syntaxes/g4macro.tmLanguage.json"
+    }]
+  }
+}
