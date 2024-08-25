@@ -189,21 +189,24 @@ export class g4macrocommands {
     }
 
     public refreshDiagnostics(doc: vscode.TextDocument, diagnosticCollection: vscode.DiagnosticCollection){
-        console.log('refreshing diagnostics');
+
         const diagnostics: vscode.Diagnostic[] = [];
 
         for (let lineIndex = 0; lineIndex < doc.lineCount; lineIndex++) {
             
                 const lineOfText = doc.lineAt(lineIndex);
                 
+                // Skip if this line does not contain commands
                 if (lineOfText.text[0] != "/")
                     continue;
 
                 if (lineOfText.text.length <= 1)
                     continue;
                 
+                // Get the command
                 const lineCommand = this.getCurrentCommand(lineOfText.text);
                 
+                // Skip if there is not information about this command
                 if (lineCommand[0] == undefined || lineCommand[1] == undefined)
                 {
                     diagnostics.push(
@@ -211,10 +214,11 @@ export class g4macrocommands {
                                 lineOfText.range, "Command not found in registry!", vscode.DiagnosticSeverity.Warning
                             )
                     );
-                    
+
                     continue;
                 }
                 
+                // Get the current parameters
                 const currentParameters = this.getInputParameters(lineOfText.text);
 
                 if (currentParameters.length == 0)
@@ -227,6 +231,7 @@ export class g4macrocommands {
 
                 const params = currentCommandMeta["params"];
 
+                // Check there are not too many arguments provided
                 if (currentParameters.length > params.length)
                 {
                     diagnostics.push(
@@ -237,7 +242,8 @@ export class g4macrocommands {
                     
                     continue;
                 }
-
+                
+                // Check the types of the values provided
                 for (let i = 0; i < currentParameters.length; i++)
                 {
                     const currentParameter = currentParameters[i];
