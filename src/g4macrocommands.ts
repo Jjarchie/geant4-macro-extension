@@ -1,10 +1,8 @@
 
 import * as vscode from 'vscode';
 import * as fs from 'fs';
-import * as path from 'path';
-import { CompletionItem } from 'vscode';
-import { start } from 'repl';
 
+// Possible units that can be used
 const units = [
 	"millimeter", "millimeter2", "millimeter3", "centimeter", "centimeter2", "centimeter3", "meter", "meter2", "meter3", "kilometer", "kilometer2", "kilometer3", "parsec", "micrometer", "nanometer", "angstrom", "fermi", "barn", "millibarn", "microbarn", "nanobarn", "picobarn", "mm", "um", "nm", "mm2", "mm3", "cm", "cm2", "cm3", "liter", "L", "dL", "cL", "mL", "m", "m2", "m3", "km", "km2", "km3", "pc", "radian", "milliradian", "degree", "steradian", "rad", "mrad", "sr", "deg", "nanosecond", "second", "millisecond", "microsecond", "picosecond", "hertz", "kilohertz", "megahertz", "ns", "s", "ms", "eplus", "e_SI", "coulomb", "megaelectronvolt", "electronvolt", "kiloelectronvolt", "gigaelectronvolt", "teraelectronvolt", "petaelectronvolt", "joule", "MeV", "eV", "keV", "GeV", "TeV", "PeV", "kilogram", "gram", "milligram", "kg", "g", "mg", "watt", "newton", "hep_pascal", "bar", "atmosphere", "ampere", "milliampere", "microampere", "nanoampere", "megavolt", "kilovolt", "volt", "ohm", "farad", "millifarad", "microfarad", "nanofarad", "picofarad", "weber", "tesla", "gauss", "kilogauss", "henry", "kelvin", "mole", "becquerel", "curie", "gray", "candela", "lumen", "lux", "perCent", "perThousand", "perMillion"
 ];
@@ -25,6 +23,14 @@ function isInteger(test_string: string) : boolean {
     return /^[+-]?\d+$/.test(test_string);
 }
 
+/**
+ * Creates a diagnostic object for the given line, input parameter, and error information.
+ * 
+ * @param line - The text line where the error occurred.
+ * @param parameter - The input parameter information.
+ * @param error_info - The error information.
+ * @returns A diagnostic object representing the error.
+ */
 function getDiagnostic(line : vscode.TextLine, parameter : InputParameterInfo, error_info : string) : vscode.Diagnostic {
     return new vscode.Diagnostic(
         new vscode.Range(
@@ -50,6 +56,12 @@ export class g4macrocommands {
         this.commands = JSON.parse(fs.readFileSync(this.path, 'utf-8'));
     }
 
+    /**
+     * Retrieves the input parameters from a given line.
+     * 
+     * @param line - The line of text to extract the parameters from.
+     * @returns An array of InputParameterInfo objects for each input parameter.
+     */
     public getInputParameters(line: string): Array<InputParameterInfo> {
         
         // Initialise the array
@@ -97,6 +109,12 @@ export class g4macrocommands {
         return parameters;
     }
 
+    /**
+     * Retrieves the Geant4 UI command from the line in the document.
+     * 
+     * @param line - The input line to extract the command from.
+     * @returns An array containing the current command name and the corresponding command object.
+     */
     public getCurrentCommand(line : string): any {
         
         // Check it is a UI command line
@@ -125,6 +143,12 @@ export class g4macrocommands {
         return [currentCommandName, currentCommand];
     }
 
+    /**
+     * Retrieves the completion items for a given UI directory.
+     * 
+     * @param line The current line of code containing the UI directory.
+     * @returns An array of vscode.CompletionItem objects for each possible completion.
+     */
     public getCompletionItems(line: string): Array<vscode.CompletionItem> {
         
         // Get the current command
@@ -146,6 +170,13 @@ export class g4macrocommands {
         return completionItems;
     }
 
+
+    /**
+     * Retrieves the signature help for the current command based on the provided macro line.
+     * 
+     * @param line The line of code containing the command.
+     * @returns The signature help for the current command, or null if there is no guidance available.
+     */
     public getCurrentSignature(line: string): vscode.SignatureHelp | any | null {
 
         // Get the info about the command
@@ -192,6 +223,13 @@ export class g4macrocommands {
         return sigHelp;
     }
 
+
+    /**
+     * Refreshes the diagnostics for the parameters provided in the macro document.
+     * 
+     * @param doc - The TextDocument to refresh diagnostics for.
+     * @param diagnosticCollection - The DiagnosticCollection to update with the refreshed diagnostics.
+     */
     public refreshDiagnostics(doc: vscode.TextDocument, diagnosticCollection: vscode.DiagnosticCollection){
 
         if (doc.languageId != "g4macro")
@@ -286,6 +324,13 @@ export class g4macrocommands {
         diagnosticCollection.set(doc.uri, diagnostics);
     }
 
+
+    /**
+     * Maintains the diagnostics for the active text editor and updates them when necessary.
+     * 
+     * @param context - The extension context.
+     * @param diagnosticCollection - The diagnostic collection to maintain.
+     */
     public maintainDiagnostics(context: vscode.ExtensionContext, diagnosticCollection: vscode.DiagnosticCollection){
         
         if (vscode.window.activeTextEditor) {
