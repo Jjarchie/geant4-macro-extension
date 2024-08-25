@@ -13,6 +13,10 @@ function isWhitespace(test_char: string) : boolean {
     return (/\s/.test(test_char));
 }
 
+function isDouble(test_string: string) : boolean {
+    return /^[+-]?(\d+(\.\d*)?|\.\d+)([eE][+-]?\d+)?$/.test(test_string);
+}
+
 export class g4macrocommands {
     path: string="";
     commands: any={};
@@ -225,6 +229,19 @@ export class g4macrocommands {
                                     )
                             );
                             continue;
+                        }
+                    }
+
+                    if (guidanceParam["type"] == "d")
+                    {
+                        if (!isDouble(currentParameter.parameter)) {
+                            diagnostics.push(
+                                new vscode.Diagnostic(
+                                    new vscode.Range(
+                                        lineOfText.lineNumber, startIdx, lineOfText.lineNumber, endIdx + 1
+                                    ), "This parameter must be of type double!", vscode.DiagnosticSeverity.Error
+                                )
+                            );
                         }
                     }
 
