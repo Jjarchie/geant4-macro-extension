@@ -190,6 +190,11 @@ export class g4macrocommands {
 
     public refreshDiagnostics(doc: vscode.TextDocument, diagnosticCollection: vscode.DiagnosticCollection){
 
+        if (doc.languageId != "g4macro")
+            return;
+
+        console.log('refreshing');
+
         const diagnostics: vscode.Diagnostic[] = [];
 
         for (let lineIndex = 0; lineIndex < doc.lineCount; lineIndex++) {
@@ -270,10 +275,10 @@ export class g4macrocommands {
         }
 
         diagnosticCollection.set(doc.uri, diagnostics);
-
     }
 
     public maintainDiagnostics(context: vscode.ExtensionContext, diagnosticCollection: vscode.DiagnosticCollection){
+        
         if (vscode.window.activeTextEditor) {
             this.refreshDiagnostics(vscode.window.activeTextEditor.document, diagnosticCollection);
         }

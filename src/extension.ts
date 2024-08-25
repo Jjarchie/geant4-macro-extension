@@ -18,7 +18,7 @@ export function activate(context: vscode.ExtensionContext) {
 	commands.maintainDiagnostics(context, typeDiagnostics);
 
 	const completionsProvider = vscode.languages.registerCompletionItemProvider(
-		'*',
+		'g4macro',
 		{
 			provideCompletionItems(document: vscode.TextDocument, position: vscode.Position) {
 
@@ -33,7 +33,7 @@ export function activate(context: vscode.ExtensionContext) {
 	);
 
 	const signatureInfoProvider = vscode.languages.registerSignatureHelpProvider(
-		'*',
+		'g4macro',
 		{
 			provideSignatureHelp(document: vscode.TextDocument, position: vscode.Position) {
 				console.log("finding signature help...");
