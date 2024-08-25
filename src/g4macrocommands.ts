@@ -17,6 +17,10 @@ function isDouble(test_string: string) : boolean {
     return /^[+-]?(\d+(\.\d*)?|\.\d+)([eE][+-]?\d+)?$/.test(test_string);
 }
 
+function isBoolean(test_string: string) : boolean {
+    return /^(true|false|TRUE|FALSE|1|0)$/.test(test_string);
+}
+
 export class g4macrocommands {
     path: string="";
     commands: any={};
@@ -240,6 +244,18 @@ export class g4macrocommands {
                                     new vscode.Range(
                                         lineOfText.lineNumber, startIdx, lineOfText.lineNumber, endIdx + 1
                                     ), "This parameter must be of type double!", vscode.DiagnosticSeverity.Error
+                                )
+                            );
+                        }
+                    }
+
+                    else if (guidanceParam["type"] == "b") {
+                        if (!isBoolean(currentParameter.parameter)) {
+                            diagnostics.push(
+                                new vscode.Diagnostic(
+                                    new vscode.Range(
+                                        lineOfText.lineNumber, startIdx, lineOfText.lineNumber, endIdx + 1
+                                    ), "This parameter must be of type boolean!", vscode.DiagnosticSeverity.Error
                                 )
                             );
                         }
