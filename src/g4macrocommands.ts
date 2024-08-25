@@ -21,6 +21,21 @@ function isBoolean(test_string: string) : boolean {
     return /^(true|false|TRUE|FALSE|1|0)$/.test(test_string);
 }
 
+function getDiagnostic(line : vscode.TextLine, parameter : InputParameterInfo, error_info : string) : vscode.Diagnostic {
+    return new vscode.Diagnostic(
+        new vscode.Range(
+            line.lineNumber, parameter.start_idx, line.lineNumber, parameter.end_idx + 1
+        ), error_info, vscode.DiagnosticSeverity.Error
+    );
+}
+
+
+interface InputParameterInfo {
+    parameter : string;
+    start_idx : number;
+    end_idx : number;
+}
+
 export class g4macrocommands {
     path: string="";
     commands: any={};
@@ -29,6 +44,53 @@ export class g4macrocommands {
         this.path = path;
 
         this.commands = JSON.parse(fs.readFileSync(this.path, 'utf-8'));
+    }
+
+    public getInputParameters(line: string): Array<InputParameterInfo> {
+        
+        // Initialise the array
+        const parameters: InputParameterInfo[] = [];
+        
+        // Initialise the running variables
+        let startIdx = -1;
+        let endIdx = -1;
+
+        // Check for start and end of parameters
+        for (let charNum = 0; charNum < line.length - 1; charNum++)
+        {
+            // If this is whitespace and the next is not then it is the start of a character
+            if (isWhitespace(line[charNum]) && !isWhitespace(line[charNum + 1])) {
+                startIdx = charNum + 1;
+            }
+
+            // If this is not whitespace and the next is then it is the end
+            if (!isWhitespace(line[charNum]) && isWhitespace(line[charNum + 1])) {
+                endIdx = charNum;
+
+                if (startIdx < 0)
+                    continue;
+
+                parameters.push({
+                    parameter: line.slice(startIdx, endIdx + 1),
+                    start_idx: startIdx,
+                    end_idx: endIdx
+                });
+            }
+        }
+        
+        // Add the last parameter if it was not detected
+        if (endIdx < startIdx)
+        {
+            endIdx = line.length - 1;
+
+            parameters.push({
+                parameter: line.slice(startIdx, endIdx + 1),
+                start_idx: startIdx,
+                end_idx: endIdx
+            });
+        }
+
+        return parameters;
     }
 
     public getCurrentCommand(line : string): any {
@@ -149,51 +211,11 @@ export class g4macrocommands {
                                 lineOfText.range, "Command not found in registry!", vscode.DiagnosticSeverity.Warning
                             )
                     );
+                    
                     continue;
                 }
-
-                interface ParameterInfo {
-                    parameter : string;
-                    start_idx : number;
-                    end_idx : number;
-                }
                 
-                const currentParameters: ParameterInfo[] = [];
-                let startIdx = -1;
-                let endIdx = -1;
-
-                for (let charNum = 0; charNum < lineOfText.text.length - 1; charNum++)
-                {
-                    // If this is whitespace and the next is not then it is the start of a character
-                    if (isWhitespace(lineOfText.text[charNum]) && !isWhitespace(lineOfText.text[charNum + 1])) {
-                        startIdx = charNum + 1;
-                    }
-
-                    // If this is not whitespace and the next is then it is the end
-                    if (!isWhitespace(lineOfText.text[charNum]) && isWhitespace(lineOfText.text[charNum + 1])) {
-                        endIdx = charNum;
-
-                        if (startIdx < 0)
-                            continue;
-
-                        currentParameters.push({
-                            parameter: lineOfText.text.slice(startIdx, endIdx + 1),
-                            start_idx: startIdx,
-                            end_idx: endIdx
-                        });
-                    }
-                }
-                
-                if (endIdx < startIdx)
-                {
-                    endIdx = lineOfText.text.length - 1;
-
-                    currentParameters.push({
-                        parameter: lineOfText.text.slice(startIdx, endIdx + 1),
-                        start_idx: startIdx,
-                        end_idx: endIdx
-                    });
-                }
+                const currentParameters = this.getInputParameters(lineOfText.text);
 
                 if (currentParameters.length == 0)
                     continue;
@@ -212,6 +234,7 @@ export class g4macrocommands {
                                 lineOfText.range, "Too many arguments!", vscode.DiagnosticSeverity.Error
                             )
                     );
+                    
                     continue;
                 }
 
@@ -222,44 +245,19 @@ export class g4macrocommands {
 
                     if (guidanceParam["name"] == "Unit")
                     {
-                        console.log("'" + currentParameter + "'");
                         if (!units.includes(currentParameter.parameter))
                         {
-                            diagnostics.push(
-                                new vscode.Diagnostic(
-                                        new vscode.Range(
-                                            lineOfText.lineNumber, startIdx, lineOfText.lineNumber, endIdx + 1
-                                        ), "Invalid unit!", vscode.DiagnosticSeverity.Error
-                                    )
-                            );
+                            diagnostics.push(getDiagnostic(lineOfText, currentParameter, "Invalid unit!"));
+
                             continue;
                         }
                     }
 
-                    if (guidanceParam["type"] == "d")
-                    {
-                        if (!isDouble(currentParameter.parameter)) {
-                            diagnostics.push(
-                                new vscode.Diagnostic(
-                                    new vscode.Range(
-                                        lineOfText.lineNumber, startIdx, lineOfText.lineNumber, endIdx + 1
-                                    ), "This parameter must be of type double!", vscode.DiagnosticSeverity.Error
-                                )
-                            );
-                        }
-                    }
+                    if (guidanceParam["type"] == "d" && !isDouble(currentParameter.parameter))
+                        diagnostics.push(getDiagnostic(lineOfText, currentParameter, "Parameter is not of type double!"));
 
-                    else if (guidanceParam["type"] == "b") {
-                        if (!isBoolean(currentParameter.parameter)) {
-                            diagnostics.push(
-                                new vscode.Diagnostic(
-                                    new vscode.Range(
-                                        lineOfText.lineNumber, startIdx, lineOfText.lineNumber, endIdx + 1
-                                    ), "This parameter must be of type boolean!", vscode.DiagnosticSeverity.Error
-                                )
-                            );
-                        }
-                    }
+                    else if (guidanceParam["type"] == "b" && !isBoolean(currentParameter.parameter)) 
+                        diagnostics.push(getDiagnostic(lineOfText, currentParameter, "Parameter is not of type boolean!"));
 
                 }
 
