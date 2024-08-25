@@ -35,5 +35,20 @@ export function activate(context: vscode.ExtensionContext) {
 		'/'
 	);
 
-	context.subscriptions.push(completionsProvider);
+	const signatureInfoProvider = vscode.languages.registerSignatureHelpProvider(
+		'*',
+		{
+			provideSignatureHelp(document: vscode.TextDocument, position: vscode.Position) {
+				console.log("finding signature help...");
+				
+				// Get the line up to the current cursor
+				const linePrefix = document.lineAt(position).text.slice(0, position.character);
+
+				return commands.getCurrentSignature(linePrefix);
+			},
+		},
+		' '
+	);
+
+	context.subscriptions.push(completionsProvider, signatureInfoProvider);
 }
