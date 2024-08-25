@@ -11,6 +11,12 @@ export function activate(context: vscode.ExtensionContext) {
 
 	const commands = new g4macrocommands(completionsPath);
 
+	// Create a diagnostic collection for the type errors
+	const typeDiagnostics = vscode.languages.createDiagnosticCollection("types");
+	context.subscriptions.push(typeDiagnostics);
+
+	commands.maintainDiagnostics(context, typeDiagnostics);
+
 	const completionsProvider = vscode.languages.registerCompletionItemProvider(
 		'*',
 		{
