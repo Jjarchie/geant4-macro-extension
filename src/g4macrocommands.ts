@@ -21,6 +21,10 @@ function isBoolean(test_string: string) : boolean {
     return /^(true|false|TRUE|FALSE|1|0)$/.test(test_string);
 }
 
+function isInteger(test_string: string) : boolean {
+    return /^[+-]?\d+$/.test(test_string);
+}
+
 function getDiagnostic(line : vscode.TextLine, parameter : InputParameterInfo, error_info : string) : vscode.Diagnostic {
     return new vscode.Diagnostic(
         new vscode.Range(
@@ -264,11 +268,16 @@ export class g4macrocommands {
                         }
                     }
 
-                    if (guidanceParam["type"] == "d" && !isDouble(currentParameter.parameter))
+                    const paramType = guidanceParam["type"];
+
+                    if (paramType == "d" && !isDouble(currentParameter.parameter))
                         diagnostics.push(getDiagnostic(lineOfText, currentParameter, "Parameter is not of type double!"));
 
-                    else if (guidanceParam["type"] == "b" && !isBoolean(currentParameter.parameter)) 
+                    else if (paramType == "b" && !isBoolean(currentParameter.parameter)) 
                         diagnostics.push(getDiagnostic(lineOfText, currentParameter, "Parameter is not of type boolean!"));
+
+                    else if (paramType == "i" && !isInteger(currentParameter.parameter)) 
+                        diagnostics.push(getDiagnostic(lineOfText, currentParameter, "Parameter is not of type integer!"));
 
                 }
 
