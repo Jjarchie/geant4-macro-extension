@@ -31,12 +31,7 @@
         "path": "./syntaxes/g4macro.tmLanguage.json"
       }
     ],
-    "commands": [
-      {
-        "command": "extension.regenerateCache",
-        "title": "Regenerate Cache"
-      }
-    ]
+    "commands": []
   },
   "activationEvents": [],
   "main": "./out/extension.js",
