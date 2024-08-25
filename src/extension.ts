@@ -16,6 +16,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 	commands.maintainDiagnostics(context, typeDiagnostics);
 
+	// Provide completions for the UI commands
 	const completionsProvider = vscode.languages.registerCompletionItemProvider(
 		'g4macro',
 		{
@@ -31,6 +32,7 @@ export function activate(context: vscode.ExtensionContext) {
 		'/'
 	);
 
+	// Provide the function signatures for the UI calls
 	const signatureInfoProvider = vscode.languages.registerSignatureHelpProvider(
 		'g4macro',
 		{
