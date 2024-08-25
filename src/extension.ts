@@ -32,7 +32,6 @@ export function activate(context: vscode.ExtensionContext) {
 
 				// Split into the different directories
 				const splitString = linePrefix.slice(1, linePrefix.length).split('/');
-				const currentString = splitString[-1];
 
 				// Access the correct branch of the dictionary
 				let currentCompletions = completions;
