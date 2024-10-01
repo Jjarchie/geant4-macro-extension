@@ -4,34 +4,34 @@ import * as fs from 'fs';
 
 // Possible units that can be used
 const units = [
-	"millimeter", "millimeter2", "millimeter3", "centimeter", "centimeter2", "centimeter3", "meter", "meter2", "meter3", "kilometer", "kilometer2", "kilometer3", "parsec", "micrometer", "nanometer", "angstrom", "fermi", "barn", "millibarn", "microbarn", "nanobarn", "picobarn", "mm", "um", "nm", "mm2", "mm3", "cm", "cm2", "cm3", "liter", "L", "dL", "cL", "mL", "m", "m2", "m3", "km", "km2", "km3", "pc", "radian", "milliradian", "degree", "steradian", "rad", "mrad", "sr", "deg", "nanosecond", "second", "millisecond", "microsecond", "picosecond", "hertz", "kilohertz", "megahertz", "ns", "s", "ms", "eplus", "e_SI", "coulomb", "megaelectronvolt", "electronvolt", "kiloelectronvolt", "gigaelectronvolt", "teraelectronvolt", "petaelectronvolt", "joule", "MeV", "eV", "keV", "GeV", "TeV", "PeV", "kilogram", "gram", "milligram", "kg", "g", "mg", "watt", "newton", "hep_pascal", "bar", "atmosphere", "ampere", "milliampere", "microampere", "nanoampere", "megavolt", "kilovolt", "volt", "ohm", "farad", "millifarad", "microfarad", "nanofarad", "picofarad", "weber", "tesla", "gauss", "kilogauss", "henry", "kelvin", "mole", "becquerel", "curie", "gray", "candela", "lumen", "lux", "perCent", "perThousand", "perMillion"
+    "millimeter", "millimeter2", "millimeter3", "centimeter", "centimeter2", "centimeter3", "meter", "meter2", "meter3", "kilometer", "kilometer2", "kilometer3", "parsec", "micrometer", "nanometer", "angstrom", "fermi", "barn", "millibarn", "microbarn", "nanobarn", "picobarn", "mm", "um", "nm", "mm2", "mm3", "cm", "cm2", "cm3", "liter", "L", "dL", "cL", "mL", "m", "m2", "m3", "km", "km2", "km3", "pc", "radian", "milliradian", "degree", "steradian", "rad", "mrad", "sr", "deg", "nanosecond", "second", "millisecond", "microsecond", "picosecond", "hertz", "kilohertz", "megahertz", "ns", "s", "ms", "eplus", "e_SI", "coulomb", "megaelectronvolt", "electronvolt", "kiloelectronvolt", "gigaelectronvolt", "teraelectronvolt", "petaelectronvolt", "joule", "MeV", "eV", "keV", "GeV", "TeV", "PeV", "kilogram", "gram", "milligram", "kg", "g", "mg", "watt", "newton", "hep_pascal", "bar", "atmosphere", "ampere", "milliampere", "microampere", "nanoampere", "megavolt", "kilovolt", "volt", "ohm", "farad", "millifarad", "microfarad", "nanofarad", "picofarad", "weber", "tesla", "gauss", "kilogauss", "henry", "kelvin", "mole", "becquerel", "curie", "gray", "candela", "lumen", "lux", "perCent", "perThousand", "perMillion"
 ];
 
-function isWhitespace(test_char: string) : boolean {
+function isWhitespace(test_char: string): boolean {
     return (/\s/.test(test_char));
 }
 
-function isDouble(test_string: string) : boolean {
+function isDouble(test_string: string): boolean {
     return /^[+-]?(\d+(\.\d*)?|\.\d+)([eE][+-]?\d+)?$/.test(test_string);
 }
 
-function isBoolean(test_string: string) : boolean {
+function isBoolean(test_string: string): boolean {
     return /^(true|false|TRUE|FALSE|1|0)$/.test(test_string);
 }
 
-function isInteger(test_string: string) : boolean {
+function isInteger(test_string: string): boolean {
     return /^[+-]?\d+$/.test(test_string);
 }
 
 /**
  * Creates a diagnostic object for the given line, input parameter, and error information.
- * 
+ *
  * @param line - The text line where the error occurred.
  * @param parameter - The input parameter information.
  * @param error_info - The error information.
  * @returns A diagnostic object representing the error.
  */
-function getDiagnostic(line : vscode.TextLine, parameter : InputParameterInfo, error_info : string) : vscode.Diagnostic {
+function getDiagnostic(line: vscode.TextLine, parameter: InputParameterInfo, error_info: string): vscode.Diagnostic {
     return new vscode.Diagnostic(
         new vscode.Range(
             line.lineNumber, parameter.start_idx, line.lineNumber, parameter.end_idx + 1
@@ -41,14 +41,14 @@ function getDiagnostic(line : vscode.TextLine, parameter : InputParameterInfo, e
 
 
 interface InputParameterInfo {
-    parameter : string;
-    start_idx : number;
-    end_idx : number;
+    parameter: string;
+    start_idx: number;
+    end_idx: number;
 }
 
 export class g4macrocommands {
-    path: string="";
-    commands: any={};
+    path: string = "";
+    commands: any = {};
 
     constructor(path: string) {
         this.path = path;
@@ -58,22 +58,21 @@ export class g4macrocommands {
 
     /**
      * Retrieves the input parameters from a given line.
-     * 
+     *
      * @param line - The line of text to extract the parameters from.
      * @returns An array of InputParameterInfo objects for each input parameter.
      */
     public getInputParameters(line: string): Array<InputParameterInfo> {
-        
+
         // Initialise the array
         const parameters: InputParameterInfo[] = [];
-        
+
         // Initialise the running variables
         let startIdx = -1;
         let endIdx = -1;
 
         // Check for start and end of parameters
-        for (let charNum = 0; charNum < line.length - 1; charNum++)
-        {
+        for (let charNum = 0; charNum < line.length - 1; charNum++) {
             // If this is whitespace and the next is not then it is the start of a character
             if (isWhitespace(line[charNum]) && !isWhitespace(line[charNum + 1])) {
                 startIdx = charNum + 1;
@@ -93,10 +92,9 @@ export class g4macrocommands {
                 });
             }
         }
-        
+
         // Add the last parameter if it was not detected
-        if (endIdx < startIdx)
-        {
+        if (endIdx < startIdx) {
             endIdx = line.length - 1;
 
             parameters.push({
@@ -111,58 +109,77 @@ export class g4macrocommands {
 
     /**
      * Retrieves the Geant4 UI command from the line in the document.
-     * 
+     *
      * @param line - The input line to extract the command from.
      * @returns An array containing the current command name and the corresponding command object.
      */
-    public getCurrentCommand(line : string): any {
-        
+    public getCurrentCommand(line: string): { name: string, command: any } {
+
         // Check it is a UI command line
         if (line[0] != '/')
-            return [];
+            return { name: "", command: null };
 
-        // Get line up to whitespace
-        line = line.slice(0, line.indexOf(' '));
+        if (line.length == 1)
+            return { name: "", command: this.commands };
+
+        // Get line up to whitespace (if it exists)
+        const functionSeparator = line.indexOf(' ');
+
+        if (functionSeparator > 0)
+            line = line.slice(0, functionSeparator);
 
         // Split into the different directories
-        const splitString = line.slice(1, line.length).split('/');
+        const splitString = line.slice(1, line.length + 1).split('/');
+
+        // Return if there are no directories
+        if (splitString.length == 0)
+            return { name: "", command: null };
+
+        // Remove the last element if it is empty
+        if (splitString[splitString.length - 1] == "")
+            splitString.pop();
 
         // Access the correct branch of the dictionary
         let currentCommand = this.commands;
-        const currentCommandName = splitString[splitString.length - 1].replace(/\s/g, "");
-        
-        for (const entry of splitString.slice(0, -1))
-        {
 
+        // Get the last full command
+        const currentCommandName = splitString[splitString.length - 1].replace(/\s/g, "");
+
+        for (const entry of splitString) {
+
+            // Return if the command does not exist
             if (!(entry in currentCommand))
-                return [];
+                return { name: "", command: null };
 
             currentCommand = currentCommand[entry];
         }
 
-        return [currentCommandName, currentCommand];
+        // Add the last element if it is complete
+        if (currentCommandName in currentCommand)
+            currentCommand = currentCommand[currentCommandName];
+
+        return { name: currentCommandName, command: currentCommand };
     }
 
     /**
      * Retrieves the completion items for a given UI directory.
-     * 
+     *
      * @param line The current line of code containing the UI directory.
      * @returns An array of vscode.CompletionItem objects for each possible completion.
      */
     public getCompletionItems(line: string): Array<vscode.CompletionItem> {
-        
+
         // Get the current command
         const currentCommandInfo = this.getCurrentCommand(line);
-        const currentCompletions = currentCommandInfo[1];
+        const currentCompletions = currentCommandInfo.command;
 
         // Get list of the commands available
-		const completionItems = [];
+        const completionItems = [];
 
-        for (const val in currentCompletions)
-        {
-            const completionKind = ("guidance" in currentCompletions[val]) 
-						? vscode.CompletionItemKind.Function
-						: vscode.CompletionItemKind.Class;
+        for (const val in currentCompletions) {
+            const completionKind = ("guidance" in currentCompletions[val])
+                ? vscode.CompletionItemKind.Function
+                : vscode.CompletionItemKind.Class;
 
             completionItems.push(new vscode.CompletionItem(val, completionKind));
         }
@@ -173,7 +190,7 @@ export class g4macrocommands {
 
     /**
      * Retrieves the signature help for the current command based on the provided macro line.
-     * 
+     *
      * @param line The line of code containing the command.
      * @returns The signature help for the current command, or null if there is no guidance available.
      */
@@ -181,8 +198,8 @@ export class g4macrocommands {
 
         // Get the info about the command
         const currentCommandInfo = this.getCurrentCommand(line);
-        const currentCommandName = currentCommandInfo[0];
-        const currentCommandMeta = currentCommandInfo[1][currentCommandName];
+        const currentCommandName = currentCommandInfo.name;
+        const currentCommandMeta = currentCommandInfo.command[currentCommandName];
 
         // Skip if there is not guidance
         if (!("guidance" in currentCommandMeta))
@@ -201,8 +218,7 @@ export class g4macrocommands {
         signatureInfo.label = allParameters[0] + " ";
 
         // Add the parameters to the signature info and to the label
-        for (let i = 0; i < currentCommandMeta["params"].length; i++)
-        {
+        for (let i = 0; i < currentCommandMeta["params"].length; i++) {
             const param = currentCommandMeta["params"][i];
 
             signatureInfo.parameters.push(
@@ -226,98 +242,91 @@ export class g4macrocommands {
 
     /**
      * Refreshes the diagnostics for the parameters provided in the macro document.
-     * 
+     *
      * @param doc - The TextDocument to refresh diagnostics for.
      * @param diagnosticCollection - The DiagnosticCollection to update with the refreshed diagnostics.
      */
-    public refreshDiagnostics(doc: vscode.TextDocument, diagnosticCollection: vscode.DiagnosticCollection){
+    public refreshDiagnostics(doc: vscode.TextDocument, diagnosticCollection: vscode.DiagnosticCollection) {
 
         if (doc.languageId != "g4macro")
             return;
 
-        console.log('refreshing');
-
         const diagnostics: vscode.Diagnostic[] = [];
 
         for (let lineIndex = 0; lineIndex < doc.lineCount; lineIndex++) {
-            
-                const lineOfText = doc.lineAt(lineIndex);
-                
-                // Skip if this line does not contain commands
-                if (lineOfText.text[0] != "/")
-                    continue;
 
-                if (lineOfText.text.length <= 1)
-                    continue;
-                
-                // Get the command
-                const lineCommand = this.getCurrentCommand(lineOfText.text);
-                
-                // Skip if there is not information about this command
-                if (lineCommand[0] == undefined || lineCommand[1] == undefined)
-                {
-                    diagnostics.push(
-                        new vscode.Diagnostic(
-                                lineOfText.range, "Command not found in registry!", vscode.DiagnosticSeverity.Warning
-                            )
-                    );
+            const lineOfText = doc.lineAt(lineIndex);
 
-                    continue;
-                }
-                
-                // Get the current parameters
-                const currentParameters = this.getInputParameters(lineOfText.text);
+            // Skip if this line does not contain commands
+            if (lineOfText.text[0] != "/")
+                continue;
 
-                if (currentParameters.length == 0)
-                    continue;
-                
-                const currentCommandMeta = lineCommand[1][lineCommand[0]];
+            if (lineOfText.text.length <= 1)
+                continue;
 
-                if (!("params" in currentCommandMeta))
-                    continue;
+            // Get the command
+            const lineCommand = this.getCurrentCommand(lineOfText.text);
 
-                const params = currentCommandMeta["params"];
+            // Skip if there is not information about this command
+            if (lineCommand.name == undefined || lineCommand.command == undefined) {
+                diagnostics.push(
+                    new vscode.Diagnostic(
+                        lineOfText.range, "Command not found in registry!", vscode.DiagnosticSeverity.Warning
+                    )
+                );
 
-                // Check there are not too many arguments provided
-                if (currentParameters.length > params.length)
-                {
-                    diagnostics.push(
-                        new vscode.Diagnostic(
-                                lineOfText.range, "Too many arguments!", vscode.DiagnosticSeverity.Error
-                            )
-                    );
-                    
-                    continue;
-                }
-                
-                // Check the types of the values provided
-                for (let i = 0; i < currentParameters.length; i++)
-                {
-                    const currentParameter = currentParameters[i];
-                    const guidanceParam = params[i];
+                continue;
+            }
 
-                    if (guidanceParam["name"] == "Unit")
-                    {
-                        if (!units.includes(currentParameter.parameter))
-                        {
-                            diagnostics.push(getDiagnostic(lineOfText, currentParameter, "Invalid unit!"));
+            // Get the current parameters
+            const currentParameters = this.getInputParameters(lineOfText.text);
 
-                            continue;
-                        }
+            if (currentParameters.length == 0)
+                continue;
+
+            const currentCommandMeta = lineCommand.command;
+
+            if (!("params" in currentCommandMeta))
+                continue;
+
+            const params = currentCommandMeta["params"];
+
+            // Check there are not too many arguments provided
+            if (currentParameters.length > params.length) {
+                diagnostics.push(
+                    new vscode.Diagnostic(
+                        lineOfText.range, "Too many arguments!", vscode.DiagnosticSeverity.Error
+                    )
+                );
+
+                continue;
+            }
+
+            // Check the types of the values provided
+            for (let i = 0; i < currentParameters.length; i++) {
+                const currentParameter = currentParameters[i];
+                const guidanceParam = params[i];
+
+                if (guidanceParam["name"] == "Unit") {
+                    if (!units.includes(currentParameter.parameter)) {
+                        diagnostics.push(getDiagnostic(lineOfText, currentParameter, "Invalid unit!"));
+
+                        continue;
                     }
-
-                    const paramType = guidanceParam["type"];
-
-                    if (paramType == "d" && !isDouble(currentParameter.parameter))
-                        diagnostics.push(getDiagnostic(lineOfText, currentParameter, "Parameter is not of type double!"));
-
-                    else if (paramType == "b" && !isBoolean(currentParameter.parameter)) 
-                        diagnostics.push(getDiagnostic(lineOfText, currentParameter, "Parameter is not of type boolean!"));
-
-                    else if (paramType == "i" && !isInteger(currentParameter.parameter)) 
-                        diagnostics.push(getDiagnostic(lineOfText, currentParameter, "Parameter is not of type integer!"));
-
                 }
+
+                const paramType = guidanceParam["type"];
+
+                if (paramType == "d" && !isDouble(currentParameter.parameter))
+                    diagnostics.push(getDiagnostic(lineOfText, currentParameter, "Parameter is not of type double!"));
+
+                else if (paramType == "b" && !isBoolean(currentParameter.parameter))
+                    diagnostics.push(getDiagnostic(lineOfText, currentParameter, "Parameter is not of type boolean!"));
+
+                else if (paramType == "i" && !isInteger(currentParameter.parameter))
+                    diagnostics.push(getDiagnostic(lineOfText, currentParameter, "Parameter is not of type integer!"));
+
+            }
 
         }
 
@@ -327,12 +336,12 @@ export class g4macrocommands {
 
     /**
      * Maintains the diagnostics for the active text editor and updates them when necessary.
-     * 
+     *
      * @param context - The extension context.
      * @param diagnosticCollection - The diagnostic collection to maintain.
      */
-    public maintainDiagnostics(context: vscode.ExtensionContext, diagnosticCollection: vscode.DiagnosticCollection){
-        
+    public maintainDiagnostics(context: vscode.ExtensionContext, diagnosticCollection: vscode.DiagnosticCollection) {
+
         if (vscode.window.activeTextEditor) {
             this.refreshDiagnostics(vscode.window.activeTextEditor.document, diagnosticCollection);
         }
@@ -348,7 +357,7 @@ export class g4macrocommands {
         context.subscriptions.push(
             vscode.workspace.onDidChangeTextDocument(e => this.refreshDiagnostics(e.document, diagnosticCollection))
         );
-    
+
     }
-    
+
 }

@@ -1,10 +1,10 @@
 
 import * as vscode from 'vscode';
 import * as path from 'path';
-import {g4macrocommands} from './g4macrocommands';
+import { g4macrocommands } from './g4macrocommands';
 
 export function activate(context: vscode.ExtensionContext) {
-	
+
 	// Import the completions JSON
 	const completionsPath = path.join(context.extensionPath, 'completions.json');
 
@@ -26,7 +26,7 @@ export function activate(context: vscode.ExtensionContext) {
 				const linePrefix = document.lineAt(position).text.slice(0, position.character);
 
 				return commands.getCompletionItems(linePrefix);
-				
+
 			}
 		},
 		'/'
@@ -37,8 +37,7 @@ export function activate(context: vscode.ExtensionContext) {
 		'g4macro',
 		{
 			provideSignatureHelp(document: vscode.TextDocument, position: vscode.Position) {
-				console.log("finding signature help...");
-				
+
 				// Get the line up to the current cursor
 				const linePrefix = document.lineAt(position).text.slice(0, position.character);
 
