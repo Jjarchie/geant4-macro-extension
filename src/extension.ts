@@ -48,4 +48,34 @@ export function activate(context: vscode.ExtensionContext) {
 	);
 
 	context.subscriptions.push(completionsProvider, signatureInfoProvider);
+
+	// Register the command to add addtional UI commands to the registry
+	context.subscriptions.push(vscode.commands.registerCommand('geant4-macro-extension.addCommandFile', () => {
+
+		// Open the file picker
+		const files = vscode.window.showOpenDialog({
+			canSelectFiles: true,
+			canSelectFolders: false,
+			canSelectMany: true,
+			title: "Select command file(s) to add."
+		});
+
+		// Skip if no files are selected
+		if (files == undefined)
+			return;
+
+		// Add the files to the extension configuration
+		files.then((uris) => {
+			if (uris == undefined)
+				return;
+
+			commands.addCommands(uris);
+		});
+
+	}));
+
+	// Register the command to refresh the UI command registry
+	context.subscriptions.push(vscode.commands.registerCommand('geant4-macro-extension.refreshCommands', () => {
+		commands.refreshCommands();
+	}));
 }

@@ -1,6 +1,7 @@
 
 import * as vscode from 'vscode';
 import * as fs from 'fs';
+import { processCommands } from './command_reader';
 
 // Possible units that can be used
 const units = [
@@ -358,6 +359,41 @@ export class g4macrocommands {
             vscode.workspace.onDidChangeTextDocument(e => this.refreshDiagnostics(e.document, diagnosticCollection))
         );
 
+    }
+
+    public addCommands(uris: vscode.Uri[]) {
+
+        const configuration: Array<string> | undefined = vscode.workspace.getConfiguration("geant4-macro-extension").get("commandFiles");
+
+        if (configuration == undefined)
+            return;
+
+        for (const uri of uris) {
+
+            // Add to configuration if it does not exists
+            if (configuration.includes(uri.fsPath))
+                continue;
+
+            configuration.push(uri.fsPath);
+        }
+
+        vscode.workspace.getConfiguration("geant4-macro-extension").update("commandFiles", configuration, vscode.ConfigurationTarget.Workspace);
+
+        // Reload the commands
+        this.refreshCommands();
+    }
+
+    public refreshCommands() {
+        const configuration: Array<string> | undefined = vscode.workspace.getConfiguration("geant4-macro-extension").get("commandFiles");
+
+        if (configuration == undefined)
+            return;
+
+        for (const path of configuration) {
+            console.log("Refreshing commands from: " + path);
+
+            const newCommands = processCommands(path);
+        }
     }
 
 }
