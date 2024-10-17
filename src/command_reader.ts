@@ -1,7 +1,6 @@
 
 import * as fs from 'fs';
 import * as rd from 'readline';
-import { CommentThreadCollapsibleState } from 'vscode';
 
 interface Parameter {
     name: string;
