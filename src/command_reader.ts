@@ -7,6 +7,7 @@ interface Parameter {
     name: string;
     type: string;
     omittable: boolean;
+    default: string;
 }
 
 interface Command {
@@ -44,28 +45,30 @@ export function processCommands(path: string) {
 
     reader.on("line", (line: string) => {
 
-        if (line.startsWith(directoryPathSpecififier)) {
+        const isDirectory: boolean = line.startsWith(directoryPathSpecififier);
+        const isCommand: boolean = line.startsWith(commandSpecifier);
+
+        if (isDirectory || isCommand) {
 
             readingGuidance = false;
             readingParameter = false;
 
             let thisCommand = commands;
 
+            // Add the current command if it has been initialised
             if (currentCommand != null && currentCommand.command != '') {
 
-                // Add to commands
-                for (let i = 0; i < commandPath.length - 1; i++) {
-
+                for (let i = 0; i < commandPath.length - 1; i++)
                     thisCommand = thisCommand[commandPath[i]].children;
-                }
 
                 thisCommand[commandPath[commandPath.length - 1]] = currentCommand;
-
-                console.log("Added command ", currentCommand);
             }
 
-            // Get the command path, removing the whitespace at the start and end
-            commandPath = line.slice(directoryPathSpecififier.length).split("/").slice(1, -1);
+            // Get the command path
+            if (isDirectory)
+                commandPath = line.slice(directoryPathSpecififier.length).split("/").slice(1, -1);
+            else
+                commandPath = line.slice(commandSpecifier.length - 1).split("/").slice(1);
 
             // Initialise the current command
             currentCommand = { command: commandPath[commandPath.length - 1], guidance: "", parameters: [], children: {} };
@@ -82,7 +85,7 @@ export function processCommands(path: string) {
             const parameterName = line.slice(parametersSpecifier.length + 1);
 
             if (currentCommand != null)
-                currentCommand.parameters.push({ name: parameterName, type: "", omittable: false });
+                currentCommand.parameters.push({ name: parameterName, type: "", omittable: false, default: "" });
         }
 
         else if (line.startsWith(guidanceSpecififier))
@@ -96,6 +99,9 @@ export function processCommands(path: string) {
 
             if (line.startsWith(" Omittable"))
                 currentCommand.parameters[currentCommand.parameters.length - 1].omittable = line.split(" : ")[1] == "True";
+
+            if (line.startsWith(" Default value"))
+                currentCommand.parameters[currentCommand.parameters.length - 1].default = line.split(" : ")[1];
         }
 
         else if (readingGuidance && currentCommand != null) {
