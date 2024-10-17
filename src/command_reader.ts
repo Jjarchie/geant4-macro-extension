@@ -28,41 +28,46 @@ export function processCommands(path: string) {
 
     const reader = rd.createInterface(fs.createReadStream(path));
 
+    // Initialise the specifiers
     const directoryPathSpecififier = "Command directory path : ";
     const guidanceSpecififier = "Guidance :";
     const subdirectoriesSpecifier = " Sub-directories :";
     const parametersSpecifier = "Parameter :";
     const commandSpecifier = "Command /";
 
+    // Define the running variables
     const commands: Commands = {};
     let currentCommand: Command | null = null;
     let commandPath: string[] = [];
 
+    // Define the running flags
     let readingGuidance: boolean = false;
     let readingParameter: boolean = false;
 
+    // Add a command to the command map
+    const addCommand = (cmd: Command): void => {
+
+        let thisCommand = commands;
+
+        for (let i = 0; i < commandPath.length - 1; i++)
+            thisCommand = thisCommand[commandPath[i]].children;
+
+        thisCommand[commandPath[commandPath.length - 1]] = cmd;
+    };
+
     console.log("Reading commands...");
 
+    // Read all lines in the command file
     reader.on("line", (line: string) => {
 
         const isDirectory: boolean = line.startsWith(directoryPathSpecififier);
         const isCommand: boolean = line.startsWith(commandSpecifier);
 
+        // Read the command/directory
         if (isDirectory || isCommand) {
 
             readingGuidance = false;
             readingParameter = false;
-
-            let thisCommand = commands;
-
-            // Add the current command if it has been initialised
-            if (currentCommand != null && currentCommand.command != '') {
-
-                for (let i = 0; i < commandPath.length - 1; i++)
-                    thisCommand = thisCommand[commandPath[i]].children;
-
-                thisCommand[commandPath[commandPath.length - 1]] = currentCommand;
-            }
 
             // Get the command path
             if (isDirectory)
@@ -72,12 +77,11 @@ export function processCommands(path: string) {
 
             // Initialise the current command
             currentCommand = { command: commandPath[commandPath.length - 1], guidance: "", parameters: [], children: {} };
+
+            addCommand(currentCommand);
         }
 
-        else if (line.startsWith(subdirectoriesSpecifier)) {
-            readingGuidance = false;
-        }
-
+        // Read the parameter name
         else if (line.startsWith(parametersSpecifier)) {
             readingParameter = true;
             readingGuidance = false;
@@ -88,10 +92,15 @@ export function processCommands(path: string) {
                 currentCommand.parameters.push({ name: parameterName, type: "", omittable: false, default: "" });
         }
 
-        else if (line.startsWith(guidanceSpecififier))
+        // Abort guidance read if it is a subdirectory
+        else if (readingGuidance && line.startsWith(subdirectoriesSpecifier))
+            readingGuidance = false;
+
+        // Start guidance read
+        else if (readingGuidance && line.startsWith(guidanceSpecififier))
             readingGuidance = true;
 
-
+        // Read parameter metadata
         else if (readingParameter && currentCommand != null) {
 
             if (line.startsWith(" Parameters type"))
@@ -104,6 +113,7 @@ export function processCommands(path: string) {
                 currentCommand.parameters[currentCommand.parameters.length - 1].default = line.split(" : ")[1];
         }
 
+        // Add to the guidance
         else if (readingGuidance && currentCommand != null) {
 
             if (currentCommand.guidance != "")
@@ -115,6 +125,8 @@ export function processCommands(path: string) {
 
     });
 
+
     console.log(commands);
+    console.log("Command read complete!");
 
 }
