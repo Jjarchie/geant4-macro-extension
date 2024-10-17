@@ -9,11 +9,24 @@ interface Parameter {
     default: string;
 }
 
-interface Command {
+interface ICommand {
     command: string;
     guidance: string;
     parameters: Parameter[];
     children: Commands;
+
+    isDirectory(): boolean;
+}
+
+export class Command implements ICommand {
+    command: string = "";
+    guidance: string = "";
+    parameters: Parameter[] = [];
+    children: Commands = {};
+
+    isDirectory(): boolean {
+        return Object.keys(this.children).length === 0;
+    }
 }
 
 interface Commands {
@@ -75,7 +88,8 @@ export function processCommands(path: string) {
                 commandPath = line.slice(commandSpecifier.length - 1).split("/").slice(1);
 
             // Initialise the current command
-            currentCommand = { command: commandPath[commandPath.length - 1], guidance: "", parameters: [], children: {} };
+            currentCommand = new Command();
+            currentCommand.command = commandPath[commandPath.length - 1];
 
             addCommand(currentCommand);
         }
