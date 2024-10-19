@@ -86,6 +86,9 @@ export class Command implements ICommand {
 
         const path = commandPath.split("/");
 
+        if (path[path.length - 1] == '')
+            path.pop();
+
         for (let i = 1; i < path.length; i++) {
 
             if (i == path.length - 1 && command) {
@@ -96,6 +99,8 @@ export class Command implements ICommand {
             let nextCommand = thisCommand.get(path[i]);
 
             if (!nextCommand) {
+                console.log("Creating new command " + path[i]);
+
                 thisCommand.set(path[i], new Command());
                 nextCommand = thisCommand.get(path[i]);
 
