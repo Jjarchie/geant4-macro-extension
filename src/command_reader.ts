@@ -13,7 +13,7 @@ interface ICommand {
     command: string;
     guidance: string;
     parameters: Parameter[];
-    children: Commands;
+    children: Map<string, Command>;
 
     isDirectory(): boolean;
 }
@@ -22,19 +22,14 @@ export class Command implements ICommand {
     command: string = "";
     guidance: string = "";
     parameters: Parameter[] = [];
-    children: Commands = {};
+    children: Map<string, Command> = new Map<string, Command>();
 
     isDirectory(): boolean {
         return Object.keys(this.children).length === 0;
     }
 }
 
-interface Commands {
-    [key: string]: Command;
-}
-
-
-export function processCommands(path: string) {
+export function processCommands(path: string): Map<string, Command> {
 
     console.log("Processing commands from " + path);
 
@@ -48,7 +43,8 @@ export function processCommands(path: string) {
     const commandSpecifier = "Command /";
 
     // Define the running variables
-    const commands: Commands = {};
+    const commands: Map<string, Command> = new Map();
+
     let currentCommand: Command | null = null;
     let commandPath: string[] = [];
 
@@ -61,10 +57,16 @@ export function processCommands(path: string) {
 
         let thisCommand = commands;
 
-        for (let i = 0; i < commandPath.length - 1; i++)
-            thisCommand = thisCommand[commandPath[i]].children;
+        for (let i = 0; i < commandPath.length - 1; i++) {
+            const nextCommand = thisCommand.get(commandPath[i]);
 
-        thisCommand[commandPath[commandPath.length - 1]] = cmd;
+            if (!nextCommand)
+                break;
+
+            thisCommand = nextCommand.children;
+        }
+
+        thisCommand.set(commandPath[commandPath.length - 1], cmd);
     };
 
     console.log("Reading commands...");
@@ -141,5 +143,9 @@ export function processCommands(path: string) {
 
     console.log(commands);
     console.log("Command read complete!");
+
+    console.log(JSON.stringify(commands));
+
+    return commands;
 
 }
