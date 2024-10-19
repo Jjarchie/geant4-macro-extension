@@ -6,7 +6,7 @@ import { g4macrocommands } from './g4macrocommands';
 export function activate(context: vscode.ExtensionContext) {
 
 	// Import the completions JSON
-	const completionsPath = path.join(context.extensionPath, 'completions.json');
+	const completionsPath = path.join(context.extensionPath, 'command_output.txt');
 
 	const commands = new g4macrocommands(completionsPath);
 

@@ -1,7 +1,7 @@
 
 import * as vscode from 'vscode';
 import * as fs from 'fs';
-import { processCommands } from './command_reader';
+import { Command, processCommands } from './command_reader';
 
 // Possible units that can be used
 const units = [
@@ -49,12 +49,12 @@ interface InputParameterInfo {
 
 export class g4macrocommands {
     path: string = "";
-    commands: any = {};
+    commands: Command;
 
     constructor(path: string) {
         this.path = path;
 
-        this.commands = JSON.parse(fs.readFileSync(this.path, 'utf-8'));
+        this.commands = processCommands(this.path);
     }
 
     /**
@@ -114,14 +114,14 @@ export class g4macrocommands {
      * @param line - The input line to extract the command from.
      * @returns An array containing the current command name and the corresponding command object.
      */
-    public getCurrentCommand(line: string): { name: string, command: any } {
+    public getCurrentCommand(line: string): Command {
 
         // Check it is a UI command line
         if (line[0] != '/')
-            return { name: "", command: null };
+            return new Command();
 
         if (line.length == 1)
-            return { name: "", command: this.commands };
+            return this.commands;
 
         // Get line up to whitespace (if it exists)
         const functionSeparator = line.indexOf(' ');
@@ -134,7 +134,7 @@ export class g4macrocommands {
 
         // Return if there are no directories
         if (splitString.length == 0)
-            return { name: "", command: null };
+            return new Command();
 
         // Remove the last element if it is empty
         if (splitString[splitString.length - 1] == "")
@@ -148,18 +148,23 @@ export class g4macrocommands {
 
         for (const entry of splitString) {
 
-            // Return if the command does not exist
-            if (!(entry in currentCommand))
-                return { name: "", command: null };
+            const nextCommand = currentCommand.children.get(entry);
 
-            currentCommand = currentCommand[entry];
+            if (!nextCommand)
+                return new Command();
+
+            currentCommand = nextCommand;
         }
 
         // Add the last element if it is complete
-        if (currentCommandName in currentCommand)
-            currentCommand = currentCommand[currentCommandName];
+        if (currentCommandName in currentCommand) {
+            const nextCommand = currentCommand.children.get(currentCommandName);
 
-        return { name: currentCommandName, command: currentCommand };
+            if (!nextCommand)
+                return new Command();
+        }
+
+        return currentCommand;
     }
 
     /**
@@ -171,18 +176,21 @@ export class g4macrocommands {
     public getCompletionItems(line: string): Array<vscode.CompletionItem> {
 
         // Get the current command
-        const currentCommandInfo = this.getCurrentCommand(line);
-        const currentCompletions = currentCommandInfo.command;
+        const currentCompletions = this.getCurrentCommand(line);
 
         // Get list of the commands available
         const completionItems = [];
 
-        for (const val in currentCompletions) {
-            const completionKind = ("guidance" in currentCompletions[val])
-                ? vscode.CompletionItemKind.Function
-                : vscode.CompletionItemKind.Class;
+        for (const completion of currentCompletions.children.values()) {
 
-            completionItems.push(new vscode.CompletionItem(val, completionKind));
+            const completionKind = (completion.isDirectory())
+                ? vscode.CompletionItemKind.Class
+                : vscode.CompletionItemKind.Function;
+
+            if (completion.command == undefined)
+                continue;
+
+            completionItems.push(new vscode.CompletionItem(completion.command, completionKind));
         }
 
         return completionItems;
@@ -198,18 +206,16 @@ export class g4macrocommands {
     public getCurrentSignature(line: string): vscode.SignatureHelp | any | null {
 
         // Get the info about the command
-        const currentCommandInfo = this.getCurrentCommand(line);
-        const currentCommandName = currentCommandInfo.name;
-        const currentCommandMeta = currentCommandInfo.command[currentCommandName];
+        const currentCommand = this.getCurrentCommand(line);
 
         // Skip if there is not guidance
-        if (!("guidance" in currentCommandMeta))
+        if (currentCommand.command == "")
             return null;
 
         // Create a signature information object
         const signatureInfo = new vscode.SignatureInformation(
-            currentCommandName,
-            currentCommandMeta["guidance"]
+            currentCommand.command,
+            currentCommand.guidance
         );
 
         // Initialise the parameters and the signature label
@@ -219,17 +225,16 @@ export class g4macrocommands {
         signatureInfo.label = allParameters[0] + " ";
 
         // Add the parameters to the signature info and to the label
-        for (let i = 0; i < currentCommandMeta["params"].length; i++) {
-            const param = currentCommandMeta["params"][i];
+        for (const param of currentCommand.parameters) {
 
             signatureInfo.parameters.push(
                 new vscode.ParameterInformation(
-                    param["name"],
-                    param["name"] + " (" + param["type"] + ")"
+                    param.name,
+                    param.name + " (" + param.type + ")"
                 )
             );
 
-            signatureInfo.label += param["name"] + " ";
+            signatureInfo.label += param.name + " ";
         }
 
         // Return the signature help
@@ -269,7 +274,7 @@ export class g4macrocommands {
             const lineCommand = this.getCurrentCommand(lineOfText.text);
 
             // Skip if there is not information about this command
-            if (lineCommand.name == undefined || lineCommand.command == undefined) {
+            if (lineCommand == undefined || lineCommand.command == undefined) {
                 diagnostics.push(
                     new vscode.Diagnostic(
                         lineOfText.range, "Command not found in registry!", vscode.DiagnosticSeverity.Warning
@@ -285,15 +290,13 @@ export class g4macrocommands {
             if (currentParameters.length == 0)
                 continue;
 
-            const currentCommandMeta = lineCommand.command;
+            const currentCommandParameters = lineCommand.parameters;
 
-            if (!("params" in currentCommandMeta))
+            if (currentCommandParameters.length == 0)
                 continue;
 
-            const params = currentCommandMeta["params"];
-
             // Check there are not too many arguments provided
-            if (currentParameters.length > params.length) {
+            if (currentParameters.length > currentCommandParameters.length) {
                 diagnostics.push(
                     new vscode.Diagnostic(
                         lineOfText.range, "Too many arguments!", vscode.DiagnosticSeverity.Error
@@ -306,9 +309,9 @@ export class g4macrocommands {
             // Check the types of the values provided
             for (let i = 0; i < currentParameters.length; i++) {
                 const currentParameter = currentParameters[i];
-                const guidanceParam = params[i];
+                const guidanceParam = currentCommandParameters[i];
 
-                if (guidanceParam["name"] == "Unit") {
+                if (guidanceParam.name.toLowerCase() == "unit") {
                     if (!units.includes(currentParameter.parameter)) {
                         diagnostics.push(getDiagnostic(lineOfText, currentParameter, "Invalid unit!"));
 
@@ -316,7 +319,7 @@ export class g4macrocommands {
                     }
                 }
 
-                const paramType = guidanceParam["type"];
+                const paramType = guidanceParam.type;
 
                 if (paramType == "d" && !isDouble(currentParameter.parameter))
                     diagnostics.push(getDiagnostic(lineOfText, currentParameter, "Parameter is not of type double!"));

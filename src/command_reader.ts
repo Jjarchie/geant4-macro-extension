@@ -51,7 +51,7 @@ export class Commands extends Map<string, Command> {
 
 }
 
-export function processCommands(path: string): Commands {
+export function processCommands(path: string): Command {
 
     console.log("Processing commands from " + path);
 
@@ -65,7 +65,7 @@ export function processCommands(path: string): Commands {
     const commandSpecifier = "Command /";
 
     // Define the running variables
-    const commands: Map<string, Command> = new Map();
+    const commands: Command = new Command();
 
     let currentCommand: Command | null = null;
     let commandPath: string[] = [];
@@ -77,7 +77,7 @@ export function processCommands(path: string): Commands {
     // Add a command to the command map
     const addCommand = (cmd: Command): void => {
 
-        let thisCommand = commands;
+        let thisCommand = commands.children;
 
         for (let i = 0; i < commandPath.length - 1; i++) {
             const nextCommand = thisCommand.get(commandPath[i]);
