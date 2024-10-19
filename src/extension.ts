@@ -16,6 +16,62 @@ export function activate(context: vscode.ExtensionContext) {
 
 	commands.maintainDiagnostics(context, typeDiagnostics);
 
+	const hoverProvider = vscode.languages.registerHoverProvider(
+		'g4macro',
+		{
+			provideHover(document: vscode.TextDocument, position: vscode.Position) {
+
+				// Get the which is being hovered over
+				const wordRange = document.getWordRangeAtPosition(position);
+
+				if (wordRange == undefined)
+					return undefined;
+
+				const commandRange = new vscode.Range(
+					new vscode.Position(wordRange.start.line, 0),
+					new vscode.Position(wordRange.end.line, wordRange.end.character + 1)
+				);
+
+				const hoverPrefix = document.getText(commandRange);
+
+				console.log(hoverPrefix);
+
+				// Get the command being hovered
+				const command = commands.getCurrentCommand(hoverPrefix);
+
+				if (command == undefined)
+					return undefined;
+
+				// Add the markdown hover information
+				const hoverInfo = new vscode.MarkdownString();
+
+				hoverInfo.appendCodeblock(hoverPrefix);
+
+				if (command.guidance != "")
+					hoverInfo.appendMarkdown(command.guidance);
+
+				if (command.parameters.length > 0) {
+
+					hoverInfo.appendMarkdown("### Parameters\n");
+
+					command.parameters.forEach((parameter) => {
+						hoverInfo.appendMarkdown(`- *${parameter.name}*`);
+						if (parameter.type != "")
+							hoverInfo.appendMarkdown(` (${parameter.type})`);
+						if (parameter.omittable)
+							hoverInfo.appendMarkdown(" (Optional)");
+
+						if (parameter.default != "")
+							hoverInfo.appendMarkdown(` (Default: ${parameter.default})`);
+						hoverInfo.appendMarkdown("\n");
+					});
+				}
+
+				return new vscode.Hover(hoverInfo);
+			}
+		}
+	);
+
 	// Provide code actions, currently for actioning unknown commands
 	const codeActionProvider = vscode.languages.registerCodeActionsProvider(
 		'g4macro',
@@ -79,7 +135,7 @@ export function activate(context: vscode.ExtensionContext) {
 		' '
 	);
 
-	context.subscriptions.push(completionsProvider, signatureInfoProvider, codeActionProvider);
+	context.subscriptions.push(completionsProvider, signatureInfoProvider, codeActionProvider, hoverProvider);
 
 	// Register the command to add addtional UI commands to the registry
 	context.subscriptions.push(vscode.commands.registerCommand('geant4-macro-extension.addCommandFile', () => {
