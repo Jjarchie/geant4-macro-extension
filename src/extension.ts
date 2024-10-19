@@ -87,7 +87,10 @@ export function activate(context: vscode.ExtensionContext) {
 					const action = new vscode.CodeAction("Add command to registry", vscode.CodeActionKind.QuickFix);
 
 					let command: string = document.getText(diagnostic.range);
-					command = command.slice(0, command.indexOf(' '));
+					const spaceIdx = command.indexOf(' ');
+
+					if (spaceIdx != -1)
+						command = command.slice(0, command.indexOf(' '));
 
 					action.command = {
 						command: 'geant4-macro-extension.addCommand',
