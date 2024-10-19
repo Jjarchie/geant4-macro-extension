@@ -1,8 +1,6 @@
 
 import * as vscode from 'vscode';
-import * as fs from 'fs';
 import { Command } from './command_reader';
-import { get } from 'http';
 
 // Possible units that can be used
 const units = [
