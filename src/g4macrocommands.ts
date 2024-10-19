@@ -374,12 +374,38 @@ export class g4macrocommands {
 
     }
 
-    public addCommands(uris: vscode.Uri[]) {
+    public getCommandFiles(): Array<string> {
 
         const configuration: Array<string> | undefined = vscode.workspace.getConfiguration("geant4-macro-extension").get("commandFiles");
 
         if (configuration == undefined)
+            return [];
+
+        return configuration;
+
+    }
+
+    public removeCommands(commandFile: string) {
+
+        // Remove the path from the current configuration
+        const configuration: Array<string> = this.getCommandFiles();
+
+        const index = configuration.indexOf(commandFile);
+
+        if (index == -1)
             return;
+
+        configuration.splice(index, 1);
+
+        vscode.workspace.getConfiguration("geant4-macro-extension").update("commandFiles", configuration, vscode.ConfigurationTarget.Workspace);
+
+        // Reload the commands
+        this.refreshCommands();
+    }
+
+    public addCommands(uris: vscode.Uri[]) {
+
+        const configuration: Array<string> = this.getCommandFiles();
 
         for (const uri of uris) {
 

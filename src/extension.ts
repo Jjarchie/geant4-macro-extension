@@ -74,6 +74,28 @@ export function activate(context: vscode.ExtensionContext) {
 
 	}));
 
+	// Register command to remove a command file from the registry
+	context.subscriptions.push(vscode.commands.registerCommand('geant4-macro-extension.removeCommandFile', () => {
+
+		// Get the list of command files
+		const commandFiles = commands.getCommandFiles();
+
+		// Skip if no files are available
+		if (commandFiles.length == 0) {
+			vscode.window.showInformationMessage("No command files are currently loaded.");
+			return;
+		}
+
+		// Open the quick pick to select the file to remove
+		vscode.window.showQuickPick(commandFiles).then((value) => {
+			if (value == undefined)
+				return;
+
+			commands.removeCommands(value);
+		});
+
+	}));
+
 	// Register the command to refresh the UI command registry
 	context.subscriptions.push(vscode.commands.registerCommand('geant4-macro-extension.refreshCommands', () => {
 		commands.refreshCommands();

@@ -34,11 +34,15 @@
     "commands": [
       {
         "command": "geant4-macro-extension.addCommandFile",
-        "title": "Add Command File"
+        "title": "Geant4 Macro: Add Command File..."
       },
       {
         "command": "geant4-macro-extension.refreshCommands",
-        "title": "Refresh Commands"
+        "title": "Geant4 Macro: Refresh Commands"
+      },
+      {
+        "command": "geant4-macro-extension.removeCommandFile",
+        "title": "Geant4 Macro: Remove Commands..."
       }
     ],
     "configuration": {
