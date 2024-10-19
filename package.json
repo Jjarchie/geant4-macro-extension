@@ -87,5 +87,9 @@
     "@typescript-eslint/parser": "^7.14.0",
     "eslint": "^8.26.0",
     "typescript": "^5.5.4"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Jjarchie/geant4-macro-extension"
   }
 }
