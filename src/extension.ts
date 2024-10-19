@@ -135,6 +135,23 @@ export function activate(context: vscode.ExtensionContext) {
 
 	// Register a command to add an additional command to the registry
 	context.subscriptions.push(vscode.commands.registerCommand('geant4-macro-extension.addCommand', (command: string) => {
-		commands.addCommand(command);
+
+		// Add the command if it is supplied as an argument
+		if (command != undefined) {
+			commands.addCommand(command);
+			return;
+		}
+
+		// Prompt the user for the command name if it is not supplied as an argument
+		vscode.window.showInputBox({
+			prompt: "Enter the command to add."
+		}).then((value) => {
+			if (value == undefined)
+				return;
+
+			commands.addCommand(value);
+		});
+
+
 	}));
 }
