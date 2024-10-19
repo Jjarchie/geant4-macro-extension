@@ -8,6 +8,7 @@ interface Parameter {
     type: string;
     omittable: boolean;
     default: string;
+    candidates?: string[];
 }
 
 interface ICommand {
@@ -51,7 +52,11 @@ export class Command implements ICommand {
             if (parameter.omittable)
                 break;
 
-            snippet.appendPlaceholder(parameter.name);
+            if (parameter.candidates)
+                snippet.appendChoice(parameter.candidates);
+            else
+                snippet.appendPlaceholder(parameter.name);
+
             snippet.appendText(" ");
         }
 
@@ -169,6 +174,9 @@ export class Command implements ICommand {
 
                 if (line.startsWith(" Default value"))
                     currentCommand.parameters[currentCommand.parameters.length - 1].default = line.split(" : ")[1];
+
+                if (line.startsWith(" Candidates"))
+                    currentCommand.parameters[currentCommand.parameters.length - 1].candidates = line.split(" : ")[1].split(" ");
             }
 
             // Add to the guidance
