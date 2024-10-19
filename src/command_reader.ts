@@ -21,7 +21,7 @@ interface ICommand {
 
     getSnippetString(): vscode.SnippetString | undefined;
     processCommands(path: string): void;
-    addCommand(commandPath: string): void;
+    addCommand(commandPath: string, command: Command | null): void;
 }
 
 export class Command implements ICommand {
@@ -77,15 +77,19 @@ export class Command implements ICommand {
         };
     }
 
-    addCommand(commandPath: string): void {
-
-        console.log("Adding command " + commandPath);
+    addCommand(commandPath: string, command: Command | null = null): void {
 
         let thisCommand = this.children;
 
         const path = commandPath.split("/");
 
         for (let i = 1; i < path.length; i++) {
+
+            if (i == path.length - 1 && command) {
+                thisCommand.set(path[i], command);
+                break;
+            }
+
             let nextCommand = thisCommand.get(path[i]);
 
             if (!nextCommand) {
@@ -117,30 +121,12 @@ export class Command implements ICommand {
         const commandSpecifier = "Command /";
 
         let currentCommand: Command | null = null;
-        let commandPath: string[] = [];
+        let commandPathSplit: string[] = [];
+        let commandPath: string = "";
 
         // Define the running flags
         let readingGuidance: boolean = false;
         let readingParameter: boolean = false;
-
-        // Add a command to the command map
-        const addCommand = (cmd: Command): void => {
-
-            let thisCommand = this.children;
-
-            for (let i = 0; i < commandPath.length - 1; i++) {
-                const nextCommand = thisCommand.get(commandPath[i]);
-
-                if (!nextCommand)
-                    break;
-
-                thisCommand = nextCommand.children;
-            }
-
-            thisCommand.set(commandPath[commandPath.length - 1], cmd);
-        };
-
-        console.log("Reading commands...");
 
         // Read all lines in the command file
         reader.on("line", (line: string) => {
@@ -155,16 +141,21 @@ export class Command implements ICommand {
                 readingParameter = false;
 
                 // Get the command path
-                if (isDirectory)
-                    commandPath = line.slice(directoryPathSpecififier.length).split("/").slice(1, -1);
-                else
-                    commandPath = line.slice(commandSpecifier.length - 1).split("/").slice(1);
+
+                if (isDirectory) {
+                    commandPath = line.slice(directoryPathSpecififier.length);
+                    commandPathSplit = commandPath.split("/").slice(1, -1);
+                }
+                else {
+                    commandPath = line.slice(commandSpecifier.length - 1);
+                    commandPathSplit = commandPath.split("/").slice(1);
+                }
 
                 // Initialise the current command
                 currentCommand = new Command();
-                currentCommand.command = commandPath[commandPath.length - 1];
+                currentCommand.command = commandPathSplit[commandPathSplit.length - 1];
 
-                addCommand(currentCommand);
+                this.addCommand(commandPath, currentCommand);
             }
 
             // Read the parameter name
