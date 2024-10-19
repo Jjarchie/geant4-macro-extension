@@ -144,7 +144,7 @@ export function processCommands(path: string): Command {
         // Read parameter metadata
         else if (readingParameter && currentCommand != null) {
 
-            if (line.startsWith(" Parameters type"))
+            if (line.startsWith(" Parameter type"))
                 currentCommand.parameters[currentCommand.parameters.length - 1].type = line.split(" : ")[1];
 
             if (line.startsWith(" Omittable"))
