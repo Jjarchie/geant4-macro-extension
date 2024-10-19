@@ -155,14 +155,6 @@ export class g4macrocommands {
             currentCommand = nextCommand;
         }
 
-        // Add the last element if it is complete
-        if (currentCommandName in currentCommand) {
-            const nextCommand = currentCommand.children.get(currentCommandName);
-
-            if (!nextCommand)
-                return new Command();
-        }
-
         return currentCommand;
     }
 
