@@ -55,7 +55,7 @@ export class g4macrocommands {
     constructor(path: string) {
         this.path = path;
 
-        this.commands.processCommands(this.path);
+        this.refreshCommands();
     }
 
     /**
@@ -294,10 +294,12 @@ export class g4macrocommands {
 
             // Skip if there is not information about this command
             if (lineCommand == undefined || lineCommand.command == "") {
-                diagnostics.push(
-                    new vscode.Diagnostic(
-                        lineOfText.range, "Command not found in registry!", vscode.DiagnosticSeverity.Warning
-                    )
+                diagnostics.push({
+                    range: lineOfText.range,
+                    message: "Command not found in registry!",
+                    severity: vscode.DiagnosticSeverity.Warning,
+                    code: "unknown_command"
+                }
                 );
 
                 continue;
@@ -383,6 +385,17 @@ export class g4macrocommands {
 
     }
 
+    public getAdditionalCommands(): Array<string> {
+
+        const configuration: Array<string> | undefined = vscode.workspace.getConfiguration("geant4-macro-extension").get("additionalCommands");
+
+        if (configuration == undefined)
+            return [];
+
+        return configuration;
+
+    }
+
     public getCommandFiles(): Array<string> {
 
         const configuration: Array<string> | undefined = vscode.workspace.getConfiguration("geant4-macro-extension").get("commandFiles");
@@ -440,6 +453,26 @@ export class g4macrocommands {
         for (const path of configuration)
             this.commands.processCommands(path);
 
+        // Get the additional commands
+        const additionalCommands = this.getAdditionalCommands();
+
+        for (const additionalCommand of additionalCommands)
+            this.commands.addCommand(additionalCommand);
+
+    }
+
+    public addCommand(command: string) {
+
+        // Add the command to the registry
+        this.commands.addCommand(command);
+
+        // Add it to the vscode configuration
+        const configuration: Array<string> = this.getAdditionalCommands();
+
+        if (!configuration.includes(command))
+            configuration.push(command);
+
+        vscode.workspace.getConfiguration("geant4-macro-extension").update("additionalCommands", configuration, vscode.ConfigurationTarget.Workspace);
     }
 
 }

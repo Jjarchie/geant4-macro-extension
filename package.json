@@ -43,6 +43,10 @@
       {
         "command": "geant4-macro-extension.removeCommandFile",
         "title": "Geant4 Macro: Remove Commands..."
+      },
+      {
+        "command": "geant4-macro-extension.addCommand",
+        "title": "Geant4 Macro: Add command..."
       }
     ],
     "configuration": {
@@ -51,6 +55,14 @@
         "geant4-macro-extension.commandFiles": {
           "type": "array",
           "description": "List of command files to use for auto-complete",
+          "default": [],
+          "items": {
+            "type": "string"
+          }
+        },
+        "geant4-macro-extension.additionalCommands": {
+          "type": "array",
+          "description": "List of additional commands to use for auto-complete",
           "default": [],
           "items": {
             "type": "string"

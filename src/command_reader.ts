@@ -21,6 +21,7 @@ interface ICommand {
 
     getSnippetString(): vscode.SnippetString | undefined;
     processCommands(path: string): void;
+    addCommand(commandPath: string): void;
 }
 
 export class Command implements ICommand {
@@ -74,6 +75,32 @@ export class Command implements ICommand {
             parameters: this.parameters,
             children: Object.fromEntries(this.children)
         };
+    }
+
+    addCommand(commandPath: string): void {
+
+        console.log("Adding command " + commandPath);
+
+        let thisCommand = this.children;
+
+        const path = commandPath.split("/");
+
+        for (let i = 1; i < path.length; i++) {
+            let nextCommand = thisCommand.get(path[i]);
+
+            if (!nextCommand) {
+                thisCommand.set(path[i], new Command());
+                nextCommand = thisCommand.get(path[i]);
+
+                if (!nextCommand)
+                    break;
+
+                nextCommand.command = path[i];
+            }
+
+            thisCommand = nextCommand.children;
+        }
+
     }
 
     processCommands(path: string): void {

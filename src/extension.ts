@@ -16,6 +16,38 @@ export function activate(context: vscode.ExtensionContext) {
 
 	commands.maintainDiagnostics(context, typeDiagnostics);
 
+	// Provide code actions, currently for actioning unknown commands
+	const codeActionProvider = vscode.languages.registerCodeActionsProvider(
+		'g4macro',
+		{
+			provideCodeActions(document: vscode.TextDocument, range: vscode.Range, context: vscode.CodeActionContext) {
+
+				const actions: vscode.CodeAction[] = [];
+
+				context.diagnostics.forEach((diagnostic) => {
+					if (diagnostic.code != "unknown_command")
+						return;
+
+					const action = new vscode.CodeAction("Add command to registry", vscode.CodeActionKind.QuickFix);
+
+					let command: string = document.getText(diagnostic.range);
+					command = command.slice(0, command.indexOf(' '));
+
+					action.command = {
+						command: 'geant4-macro-extension.addCommand',
+						title: "Add command to registry",
+						arguments: [command]
+					};
+
+					actions.push(action);
+				});
+
+				return actions;
+
+			}
+		}
+	);
+
 	// Provide completions for the UI commands
 	const completionsProvider = vscode.languages.registerCompletionItemProvider(
 		'g4macro',
@@ -47,7 +79,7 @@ export function activate(context: vscode.ExtensionContext) {
 		' '
 	);
 
-	context.subscriptions.push(completionsProvider, signatureInfoProvider);
+	context.subscriptions.push(completionsProvider, signatureInfoProvider, codeActionProvider);
 
 	// Register the command to add addtional UI commands to the registry
 	context.subscriptions.push(vscode.commands.registerCommand('geant4-macro-extension.addCommandFile', () => {
@@ -99,5 +131,10 @@ export function activate(context: vscode.ExtensionContext) {
 	// Register the command to refresh the UI command registry
 	context.subscriptions.push(vscode.commands.registerCommand('geant4-macro-extension.refreshCommands', () => {
 		commands.refreshCommands();
+	}));
+
+	// Register a command to add an additional command to the registry
+	context.subscriptions.push(vscode.commands.registerCommand('geant4-macro-extension.addCommand', (command: string) => {
+		commands.addCommand(command);
 	}));
 }
