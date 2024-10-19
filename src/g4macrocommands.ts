@@ -1,7 +1,8 @@
 
 import * as vscode from 'vscode';
 import * as fs from 'fs';
-import { Command, processCommands } from './command_reader';
+import { Command } from './command_reader';
+import { get } from 'http';
 
 // Possible units that can be used
 const units = [
@@ -49,12 +50,12 @@ interface InputParameterInfo {
 
 export class g4macrocommands {
     path: string = "";
-    commands: Command;
+    commands: Command = new Command();
 
     constructor(path: string) {
         this.path = path;
 
-        this.commands = processCommands(this.path);
+        this.commands.processCommands(this.path);
     }
 
     /**
@@ -196,7 +197,11 @@ export class g4macrocommands {
                 commitCharacters: (completion.isDirectory()) ? ["/"] : undefined,
                 documentation: completion.guidance,
                 detail: completion.command,
-                insertText: completion.getSnippetString()
+                insertText: completion.getSnippetString(),
+                command: {
+                    command: "editor.action.triggerParameterHints",
+                    title: "triggerParameterHints"
+                }
             };
 
             completionItems.push(thisItem);
@@ -423,16 +428,14 @@ export class g4macrocommands {
     }
 
     public refreshCommands() {
-        const configuration: Array<string> | undefined = vscode.workspace.getConfiguration("geant4-macro-extension").get("commandFiles");
 
-        if (configuration == undefined)
-            return;
+        // Get the command files (including the default)
+        const configuration: Array<string> = this.getCommandFiles();
+        configuration.unshift(this.path);
 
-        for (const path of configuration) {
-            console.log("Refreshing commands from: " + path);
+        for (const path of configuration)
+            this.commands.processCommands(path);
 
-            const newCommands = processCommands(path);
-        }
     }
 
 }
