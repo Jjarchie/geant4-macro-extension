@@ -195,6 +195,8 @@ export class g4macrocommands {
                 kind: completionKind,
                 commitCharacters: (completion.isDirectory()) ? ["/"] : undefined,
                 documentation: completion.guidance,
+                detail: completion.command,
+                insertText: completion.getSnippetString()
             };
 
             completionItems.push(thisItem);

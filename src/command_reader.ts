@@ -1,6 +1,7 @@
 
 import * as fs from 'fs';
 import * as rd from 'readline';
+import * as vscode from 'vscode';
 
 interface Parameter {
     name: string;
@@ -16,6 +17,8 @@ interface ICommand {
     children: Map<string, Command>;
 
     isDirectory(): boolean;
+
+    getSnippetString(): vscode.SnippetString | undefined;
 }
 
 export class Command implements ICommand {
@@ -31,6 +34,27 @@ export class Command implements ICommand {
             parameters: { enumerable: true },
             children: { enumerable: true }
         });
+    }
+
+    getSnippetString(): vscode.SnippetString | undefined {
+
+        if (this.parameters.length == 0)
+            return undefined;
+
+        const snippet = new vscode.SnippetString(this.command);
+
+        snippet.appendText(" ");
+
+        for (const parameter of this.parameters) {
+
+            if (parameter.omittable)
+                break;
+
+            snippet.appendPlaceholder(parameter.name);
+            snippet.appendText(" ");
+        }
+
+        return snippet;
     }
 
     isDirectory(): boolean {
