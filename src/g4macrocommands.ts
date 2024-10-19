@@ -444,6 +444,9 @@ export class g4macrocommands {
 
     public refreshCommands() {
 
+        // Clear the current commands
+        this.commands = new Command();
+
         // Get the command files (including the default)
         const configuration: Array<string> = this.getCommandFiles();
         configuration.unshift(this.path);
