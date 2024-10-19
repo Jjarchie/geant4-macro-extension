@@ -31,7 +31,45 @@
         "path": "./syntaxes/g4macro.tmLanguage.json"
       }
     ],
-    "commands": []
+    "commands": [
+      {
+        "command": "geant4-macro-extension.addCommandFile",
+        "title": "Geant4 Macro: Add Command File..."
+      },
+      {
+        "command": "geant4-macro-extension.refreshCommands",
+        "title": "Geant4 Macro: Refresh Commands"
+      },
+      {
+        "command": "geant4-macro-extension.removeCommandFile",
+        "title": "Geant4 Macro: Remove Commands..."
+      },
+      {
+        "command": "geant4-macro-extension.addCommand",
+        "title": "Geant4 Macro: Add command..."
+      }
+    ],
+    "configuration": {
+      "title": "Geant4 Macro Extension",
+      "properties": {
+        "geant4-macro-extension.commandFiles": {
+          "type": "array",
+          "description": "List of command files to use for auto-complete",
+          "default": [],
+          "items": {
+            "type": "string"
+          }
+        },
+        "geant4-macro-extension.additionalCommands": {
+          "type": "array",
+          "description": "List of additional commands to use for auto-complete",
+          "default": [],
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    }
   },
   "activationEvents": [],
   "main": "./out/extension.js",
