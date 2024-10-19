@@ -4,7 +4,7 @@
   "description": "Syntax highlighting and auto-complete for Geant4 macro files",
   "version": "0.1.1",
   "icon": "images/icon.png",
-  "publisher": "jjarchie",
+  "publisher": "Jjarchie",
   "engines": {
     "vscode": "^1.92.0"
   },
@@ -91,5 +91,13 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/Jjarchie/geant4-macro-extension"
-  }
+  },
+  "keywords": [
+    "geant4",
+    "macro",
+    "extension",
+    "syntax",
+    "highlighting",
+    "autocomplete"
+  ]
 }
