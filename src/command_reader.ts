@@ -24,12 +24,34 @@ export class Command implements ICommand {
     parameters: Parameter[] = [];
     children: Map<string, Command> = new Map<string, Command>();
 
+    constructor() {
+        Object.defineProperties(this, {
+            command: { enumerable: true },
+            guidance: { enumerable: true },
+            parameters: { enumerable: true },
+            children: { enumerable: true }
+        });
+    }
+
     isDirectory(): boolean {
         return Object.keys(this.children).length === 0;
     }
+
+    toJSON() {
+        return {
+            command: this.command,
+            guidance: this.guidance,
+            parameters: this.parameters,
+            children: Object.fromEntries(this.children)
+        };
+    }
 }
 
-export function processCommands(path: string): Map<string, Command> {
+export class Commands extends Map<string, Command> {
+
+}
+
+export function processCommands(path: string): Commands {
 
     console.log("Processing commands from " + path);
 
@@ -108,12 +130,16 @@ export function processCommands(path: string): Map<string, Command> {
         }
 
         // Abort guidance read if it is a subdirectory
-        else if (readingGuidance && line.startsWith(subdirectoriesSpecifier))
+        else if (line.startsWith(subdirectoriesSpecifier)) {
             readingGuidance = false;
+            readingParameter = false;
+        }
 
         // Start guidance read
-        else if (readingGuidance && line.startsWith(guidanceSpecififier))
+        else if (line.startsWith(guidanceSpecififier)) {
             readingGuidance = true;
+            readingParameter = false;
+        }
 
         // Read parameter metadata
         else if (readingParameter && currentCommand != null) {
@@ -135,16 +161,9 @@ export function processCommands(path: string): Map<string, Command> {
                 currentCommand.guidance += "\n";
 
             currentCommand.guidance += line;
-
         }
 
     });
-
-
-    console.log(commands);
-    console.log("Command read complete!");
-
-    console.log(JSON.stringify(commands));
 
     return commands;
 
