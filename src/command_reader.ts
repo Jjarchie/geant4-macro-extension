@@ -50,11 +50,14 @@ export class Command implements ICommand {
 
         for (const parameter of this.parameters) {
 
-            if (parameter.omittable)
-                break;
-
             if (parameter.candidates)
-                snippet.appendChoice(parameter.candidates);
+                if (parameter.omittable)
+                    snippet.appendChoice([" ", ...parameter.candidates]);
+                else
+                    snippet.appendChoice(parameter.candidates);
+
+            else if (parameter.omittable)
+                snippet.appendPlaceholder(" ");
             else
                 snippet.appendPlaceholder(parameter.name);
 
