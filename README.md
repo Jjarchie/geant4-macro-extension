@@ -12,7 +12,7 @@ This is a basic VSCode extension for Geant4 UI command files (with extension `.m
 
 ## Installation
 
-The extension is available on the [Visual Studio Code Marketplace](https://marketplace.visualstudio.com/items?itemName=jjarchie.geant4-macro).
+The extension is available on the [Visual Studio Code Marketplace](https://marketplace.visualstudio.com/items?itemName=jjarchie.geant4-macro-extension).
 
 ## Usage
 
