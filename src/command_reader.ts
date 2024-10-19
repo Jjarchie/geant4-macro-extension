@@ -34,7 +34,7 @@ export class Command implements ICommand {
     }
 
     isDirectory(): boolean {
-        return Object.keys(this.children).length === 0;
+        return !(this.children.size == 0);
     }
 
     toJSON() {

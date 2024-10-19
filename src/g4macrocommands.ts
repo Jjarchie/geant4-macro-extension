@@ -190,7 +190,15 @@ export class g4macrocommands {
             if (completion.command == undefined)
                 continue;
 
-            completionItems.push(new vscode.CompletionItem(completion.command, completionKind));
+            const thisItem: vscode.CompletionItem = {
+                label: completion.command,
+                kind: completionKind,
+                commitCharacters: (completion.isDirectory()) ? ["/"] : undefined,
+                documentation: completion.guidance,
+            };
+
+            completionItems.push(thisItem);
+
         }
 
         return completionItems;
