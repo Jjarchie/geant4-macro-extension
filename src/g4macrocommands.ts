@@ -272,6 +272,10 @@ export class g4macrocommands {
         if (doc.languageId != "g4macro")
             return;
 
+        // Skip if the commands have not been imported
+        if (this.commands.children.size == 0)
+            return;
+
         const diagnostics: vscode.Diagnostic[] = [];
 
         for (let lineIndex = 0; lineIndex < doc.lineCount; lineIndex++) {
@@ -289,7 +293,7 @@ export class g4macrocommands {
             const lineCommand = this.getCurrentCommand(lineOfText.text);
 
             // Skip if there is not information about this command
-            if (lineCommand == undefined || lineCommand.command == undefined) {
+            if (lineCommand == undefined || lineCommand.command == "") {
                 diagnostics.push(
                     new vscode.Diagnostic(
                         lineOfText.range, "Command not found in registry!", vscode.DiagnosticSeverity.Warning
