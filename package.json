@@ -2,7 +2,7 @@
   "name": "geant4-macro-extension",
   "displayName": "Geant4 Macro Extension",
   "description": "Syntax highlighting and auto-complete for Geant4 macro files",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "icon": "images/icon.png",
   "publisher": "Jjarchie",
   "engines": {
