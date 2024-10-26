@@ -46,9 +46,15 @@ interface InputParameterInfo {
     end_idx: number;
 }
 
+interface Variable {
+    name: string;
+    value: any;
+}
+
 export class g4macrocommands {
     path: string = "";
     commands: Command = new Command();
+    variables: Array<Variable> = [];
 
     constructor(path: string) {
         this.path = path;
@@ -201,6 +207,25 @@ export class g4macrocommands {
         return completionItems;
     }
 
+    public getVariableCompletions(): Array<vscode.CompletionItem> {
+
+        // Get list of the commands available
+        const completionItems = [];
+
+        for (const variable of this.variables) {
+            const thisItem: vscode.CompletionItem = {
+                label: variable.name,
+                kind: vscode.CompletionItemKind.Variable,
+                commitCharacters: ["}"]
+            };
+
+            completionItems.push(thisItem);
+
+        }
+
+        return completionItems;
+
+    }
 
     /**
      * Retrieves the signature help for the current command based on the provided macro line.
@@ -250,7 +275,6 @@ export class g4macrocommands {
         return sigHelp;
     }
 
-
     /**
      * Refreshes the diagnostics for the parameters provided in the macro document.
      *
@@ -258,6 +282,8 @@ export class g4macrocommands {
      * @param diagnosticCollection - The DiagnosticCollection to update with the refreshed diagnostics.
      */
     public refreshDiagnostics(doc: vscode.TextDocument, diagnosticCollection: vscode.DiagnosticCollection) {
+
+        const newVariables: Array<Variable> = [];
 
         if (doc.languageId != "g4macro")
             return;
@@ -306,6 +332,15 @@ export class g4macrocommands {
             if (currentCommandParameters.length == 0)
                 continue;
 
+            if (lineCommand.path == "/control/alias") {
+                const thisVariable: Variable = {
+                    name: currentParameters[0].parameter,
+                    value: (currentParameters.length > 1) ? currentParameters[1].parameter : null
+                };
+
+                newVariables.push(thisVariable);
+            }
+
             // Check there are not too many arguments provided
             if (currentParameters.length > currentCommandParameters.length) {
                 diagnostics.push(
@@ -346,6 +381,8 @@ export class g4macrocommands {
         }
 
         diagnosticCollection.set(doc.uri, diagnostics);
+
+        this.variables = newVariables;
     }
 
 
