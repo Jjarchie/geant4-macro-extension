@@ -13,6 +13,7 @@ interface Parameter {
 
 interface ICommand {
     command: string;
+    path: string;
     guidance: string;
     parameters: Parameter[];
     children: Map<string, Command>;
@@ -27,6 +28,7 @@ interface ICommand {
 export class Command implements ICommand {
     command: string = "";
     guidance: string = "";
+    path: string = "";
     parameters: Parameter[] = [];
     children: Map<string, Command> = new Map<string, Command>();
 
@@ -108,6 +110,7 @@ export class Command implements ICommand {
                     break;
 
                 nextCommand.command = path[i];
+                nextCommand.path = path.slice(0, i + 1).join("/");
             }
 
             thisCommand = nextCommand.children;
@@ -162,6 +165,7 @@ export class Command implements ICommand {
                 // Initialise the current command
                 currentCommand = new Command();
                 currentCommand.command = commandPathSplit[commandPathSplit.length - 1];
+                currentCommand.path = commandPath;
 
                 this.addCommand(commandPath, currentCommand);
             }

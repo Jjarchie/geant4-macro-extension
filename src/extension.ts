@@ -2,6 +2,9 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import { g4macrocommands } from './g4macrocommands';
+import { G4MacroDefinitionProvider } from './G4MacroDefinitionProvider';
+import { G4MacroRenameProvider } from './G4MacroRenameProvider';
+import { rename } from 'fs';
 
 export function activate(context: vscode.ExtensionContext) {
 
@@ -15,6 +18,16 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(typeDiagnostics);
 
 	commands.maintainDiagnostics(context, typeDiagnostics);
+
+	const definitionProvider = vscode.languages.registerDefinitionProvider(
+		'g4macro',
+		new G4MacroDefinitionProvider(commands)
+	);
+
+	const renameProvider = vscode.languages.registerRenameProvider(
+		'g4macro',
+		new G4MacroRenameProvider(commands)
+	);
 
 	const hoverProvider = vscode.languages.registerHoverProvider(
 		'g4macro',
@@ -123,6 +136,19 @@ export function activate(context: vscode.ExtensionContext) {
 		'/'
 	);
 
+	// Provide completions for the registers alias'
+	const aliasProvider = vscode.languages.registerCompletionItemProvider(
+		'g4macro',
+		{
+			provideCompletionItems() {
+
+				return commands.getVariableCompletions();
+
+			}
+		},
+		'{'
+	);
+
 	// Provide the function signatures for the UI calls
 	const signatureInfoProvider = vscode.languages.registerSignatureHelpProvider(
 		'g4macro',
@@ -138,7 +164,14 @@ export function activate(context: vscode.ExtensionContext) {
 		' '
 	);
 
-	context.subscriptions.push(completionsProvider, signatureInfoProvider, codeActionProvider, hoverProvider);
+	context.subscriptions.push(
+		definitionProvider,
+		renameProvider,
+		completionsProvider,
+		aliasProvider,
+		signatureInfoProvider,
+		codeActionProvider,
+		hoverProvider);
 
 	// Register the command to add addtional UI commands to the registry
 	context.subscriptions.push(vscode.commands.registerCommand('geant4-macro-extension.addCommandFile', () => {
