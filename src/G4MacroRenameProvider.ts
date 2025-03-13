@@ -3,59 +3,43 @@ import * as vscode from 'vscode';
 import { Variable, g4macrocommands } from './g4macrocommands';
 import { start } from 'repl';
 
-function getVariableRange(lineText: string, position: vscode.Position) : undefined | vscode.Range {
+function getVariableRange(document: vscode.TextDocument, lineText: string, position: vscode.Position) : undefined | vscode.Range {
     
-    let startIdx = position.character;
-    let endIdx = position.character;
-    let variableDefinition = false;
+    // Get the word range
+    let wordRange = document.getWordRangeAtPosition(position);
+    const baseRange = wordRange;
 
-    // Get the starting brace index
-    for (; startIdx >= 0; --startIdx) {
-        const char = lineText.at(startIdx);
+    if (wordRange == undefined)
+        return undefined;
 
-        if (char == ' ' || char == '\t') {
-            variableDefinition = true;
-            break;
-        }
-            
-        if (char == '{')
-            break;
-    }
+    // Get the range including the braces if they exist
+    let startPos = wordRange.start;
+    let endPos = wordRange.end;
 
-    // Get the ending brace index
-    for (; endIdx < lineText.length; ++endIdx) {
+    if (wordRange.start.character != 0 && lineText.at(wordRange.start.character - 1)  == '{') 
+        startPos = startPos.translate(0, -1);
 
-        const char = lineText.at(endIdx);
+    if (wordRange.start.character != lineText.length && lineText.at(wordRange.end.character)  == '}') 
+        endPos = endPos.translate(0, 1);
 
-        if (char == ' ' || char == '\t') {
-            variableDefinition = true;
-            break;
-        }
+    wordRange = new vscode.Range(startPos, endPos);
+        
+    // Get the word
+    const word = document.getText(wordRange);
 
-        if (char == '}')
-            break;
-    }
-
-    // If it is just the variable in braces, return the range
-    const range = new vscode.Range(
-        position.line,
-        startIdx + 1,
-        position.line,
-        endIdx
-    );
-
-    if (!variableDefinition)
-        return range;
+    // Return the found range if it is a variable
+    if (word.startsWith('{') && word.endsWith('}'))
+        return baseRange;
     
     // Otherwise, check we are at the correct command
     if (!lineText.startsWith('/control/alias'))
         return undefined;
     
     // And check that we are the the correct parameter
-    const numberSpaces = lineText.substring(0, startIdx).split(/\s+/).length;
+    const numberSpaces = lineText.substring(0, wordRange.start.character).split(/\s+/).length;
 
     if (numberSpaces == 1)
-        return range;
+        return baseRange;
 
     return undefined;
 }
@@ -160,7 +144,7 @@ export class G4MacroRenameProvider implements vscode.RenameProvider {
 
         const lineText = document.lineAt(position.line).text;
 
-        const variableRange = getVariableRange(lineText, position);
+        const variableRange = getVariableRange(document, lineText, position);
         
         // If a valid range, return it
         if (variableRange != undefined)
