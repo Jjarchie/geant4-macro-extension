@@ -298,22 +298,29 @@ export class g4macrocommands {
 
         for (let lineIndex = 0; lineIndex < doc.lineCount; lineIndex++) {
 
-            const lineOfText = doc.lineAt(lineIndex);
+            const line = doc.lineAt(lineIndex);
+            let lineOfText = line.text;
+            
+            // Get the line up to the first comment
+            const commentIdx = lineOfText.indexOf('#');
+
+            if (commentIdx != -1)
+                lineOfText = lineOfText.substring(0, commentIdx);
 
             // Skip if this line does not contain commands
-            if (lineOfText.text[0] != "/")
+            if (lineOfText[0] != "/")
                 continue;
 
-            if (lineOfText.text.length <= 1)
+            if (lineOfText.length <= 1)
                 continue;
 
             // Get the command
-            const lineCommand = this.getCurrentCommand(lineOfText.text);
+            const lineCommand = this.getCurrentCommand(lineOfText);
 
             // Skip if there is not information about this command
             if (lineCommand == undefined || lineCommand.command == "") {
                 diagnostics.push({
-                    range: lineOfText.range,
+                    range: line.range,
                     message: "Command not found in registry!",
                     severity: vscode.DiagnosticSeverity.Warning,
                     code: "unknown_command"
@@ -324,7 +331,7 @@ export class g4macrocommands {
             }
 
             // Get the current parameters
-            const currentParameters = this.getInputParameters(lineOfText.text);
+            const currentParameters = this.getInputParameters(lineOfText);
 
             if (currentParameters.length == 0)
                 continue;
@@ -358,7 +365,7 @@ export class g4macrocommands {
             if (currentParameters.length > currentCommandParameters.length) {
                 diagnostics.push(
                     new vscode.Diagnostic(
-                        lineOfText.range, "Too many arguments!", vscode.DiagnosticSeverity.Error
+                        line.range, "Too many arguments!", vscode.DiagnosticSeverity.Error
                     )
                 );
 
@@ -377,7 +384,7 @@ export class g4macrocommands {
 
                 if (guidanceParam.name.toLowerCase() == "unit") {
                     if (!units.includes(parameterString)) {
-                        diagnostics.push(getDiagnostic(lineOfText, currentParameter, "Invalid unit!"));
+                        diagnostics.push(getDiagnostic(line, currentParameter, "Invalid unit!"));
 
                         continue;
                     }
@@ -386,13 +393,13 @@ export class g4macrocommands {
                 const paramType = guidanceParam.type;
 
                 if (paramType == "d" && !isDouble(parameterString))
-                    diagnostics.push(getDiagnostic(lineOfText, currentParameter, "Parameter is not of type double!"));
+                    diagnostics.push(getDiagnostic(line, currentParameter, "Parameter is not of type double!"));
 
                 else if (paramType == "b" && !isBoolean(parameterString))
-                    diagnostics.push(getDiagnostic(lineOfText, currentParameter, "Parameter is not of type boolean!"));
+                    diagnostics.push(getDiagnostic(line, currentParameter, "Parameter is not of type boolean!"));
 
                 else if (paramType == "i" && !isInteger(parameterString))
-                    diagnostics.push(getDiagnostic(lineOfText, currentParameter, "Parameter is not of type integer!"));
+                    diagnostics.push(getDiagnostic(line, currentParameter, "Parameter is not of type integer!"));
 
             }
 
