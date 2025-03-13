@@ -369,8 +369,13 @@ export class g4macrocommands {
                 const currentParameter = currentParameters[i];
                 const guidanceParam = currentCommandParameters[i];
 
+                let parameterString = currentParameter.parameter;
+
+                if (parameterString.indexOf("{") != -1)
+                    parameterString = this.fillVariableInString(parameterString);
+
                 if (guidanceParam.name.toLowerCase() == "unit") {
-                    if (!units.includes(currentParameter.parameter)) {
+                    if (!units.includes(parameterString)) {
                         diagnostics.push(getDiagnostic(lineOfText, currentParameter, "Invalid unit!"));
 
                         continue;
@@ -379,13 +384,13 @@ export class g4macrocommands {
 
                 const paramType = guidanceParam.type;
 
-                if (paramType == "d" && !isDouble(currentParameter.parameter))
+                if (paramType == "d" && !isDouble(parameterString))
                     diagnostics.push(getDiagnostic(lineOfText, currentParameter, "Parameter is not of type double!"));
 
-                else if (paramType == "b" && !isBoolean(currentParameter.parameter))
+                else if (paramType == "b" && !isBoolean(parameterString))
                     diagnostics.push(getDiagnostic(lineOfText, currentParameter, "Parameter is not of type boolean!"));
 
-                else if (paramType == "i" && !isInteger(currentParameter.parameter))
+                else if (paramType == "i" && !isInteger(parameterString))
                     diagnostics.push(getDiagnostic(lineOfText, currentParameter, "Parameter is not of type integer!"));
 
             }
@@ -395,6 +400,55 @@ export class g4macrocommands {
         diagnosticCollection.set(doc.uri, diagnostics);
 
         this.variables = newVariables;
+    }
+
+    public fillVariableInString(toFill: string) : string {
+
+        // A stack for the "{"
+        const startIndices: number[] = [];
+
+        // A queue for the "}"
+        const endIndices: number[] = [];
+        
+        for (let i = 0; i < toFill.length; ++i) {
+            
+            // Add to the start index stack
+            if (toFill.at(i) == "{")
+                startIndices.push(i);
+
+            // Skip if not at the end
+            if (toFill.at(i) != "}")
+                continue;
+
+            // Mis-match in indices of "{" and "}". Do not continue.
+            if (startIndices.length == 0) {
+                console.log("Mismatch in braces in parameter string!");
+                return toFill;
+            }
+
+            // Get the last substring
+            const startIdx = startIndices.at(-1)!;
+            const varName = toFill.substring(startIdx + 1, i);
+            
+            const variable = this.getVariable(varName);
+
+            // If the variable does not exist, just treat as string?
+            // Pop the last "{" from the stack
+            if (variable == undefined) {
+                startIndices.pop();
+                continue;
+            }
+
+            // Replace the variable name with its definition
+            toFill = toFill.replace("{" + varName + "}", variable.value);
+
+            startIndices.pop();
+            i = startIdx;
+        }
+
+        return toFill;
+
+
     }
 
     public getVariable(variableName: string) : Variable | undefined {
