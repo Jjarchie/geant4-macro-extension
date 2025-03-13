@@ -70,6 +70,27 @@
           }
         }
       }
+    },
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "geant4-macro-bar",
+          "title": "Geant4 Macro",
+          "icon": "images/geant4_logo.svg"
+        }
+      ]
+    },
+    "views": {
+      "geant4-macro-bar": [
+        {
+          "id": "geant4-macro-explorer",
+          "name": "Command Explorer"
+        },
+        {
+          "id": "geant4-macro-active-command",
+          "name": "Command"
+        }
+      ]
     }
   },
   "activationEvents": [],

@@ -32,6 +32,9 @@ export class Command implements ICommand {
     parameters: Parameter[] = [];
     children: Map<string, Command> = new Map<string, Command>();
 
+    private _onDidFinishReading = new vscode.EventEmitter<void>();
+    public readonly onDidFinishReading = this._onDidFinishReading.event;
+
     constructor() {
         Object.defineProperties(this, {
             command: { enumerable: true },
@@ -219,6 +222,13 @@ export class Command implements ICommand {
             }
 
         });
+
+        // Update things that are required on close as the read is asynchronous
+        reader.on("close", () => {
+            // Notify listeners that we finished reading
+            this._onDidFinishReading.fire(); 
+        });
+
 
     }
 }

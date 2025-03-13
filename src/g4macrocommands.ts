@@ -570,6 +570,12 @@ export class g4macrocommands {
         for (const additionalCommand of additionalCommands)
             this.commands.addCommand(additionalCommand);
 
+        console.log("commands refreshed!");
+
+        for (const child of this.commands.children) {
+            console.log(child);
+        }
+
     }
 
     public addCommand(command: string) {
