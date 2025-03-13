@@ -47,6 +47,11 @@ Hover over a command to see information about the command and its parameters:
 
 ![Hover Information](images/hover.gif)
 
+### Variable Definitions
+
+Variables are commonly included in Geant4 macros through the use of the `/control/alias [PARAMETER_NAME] [PARAMETER_VALUE]` command. This extension provides definition autocomplete of parameters which have been defined in the macro file. The type of the parameter where the variable is included is also considered.
+
+_Note: this extension does not currently support autocomplete for variables which are not defined in the current document, such as those used in `/control/foreach` or `/control/loop`. This will be implemented in a future release._
 
 ## Feature Requests
 
