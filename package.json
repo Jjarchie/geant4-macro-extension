@@ -87,6 +87,7 @@
           "name": "Command Explorer"
         },
         {
+          "type": "webview",
           "id": "geant4-macro-active-command",
           "name": "Command"
         }

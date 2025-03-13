@@ -5,6 +5,7 @@ import { g4macrocommands } from './g4macrocommands';
 import { G4MacroDefinitionProvider } from './G4MacroDefinitionProvider';
 import { G4MacroRenameProvider } from './G4MacroRenameProvider';
 import { G4MacroCommandTreeDataProvider } from './G4MacroCommandTreeView';
+import { G4MacroCommandInfoViewProvider } from './G4MacroCommandInfoView';
 import { rename } from 'fs';
 
 export function activate(context: vscode.ExtensionContext) {
@@ -250,5 +251,28 @@ export function activate(context: vscode.ExtensionContext) {
 
 	// Maintain the views
 	const commandTreeViewProvider = new G4MacroCommandTreeDataProvider(commands);
-	vscode.window.registerTreeDataProvider('geant4-macro-explorer', commandTreeViewProvider);
+	const tree = vscode.window.createTreeView('geant4-macro-explorer', {treeDataProvider: commandTreeViewProvider, showCollapseAll: true });
+	// vscode.window.registerTreeDataProvider('geant4-macro-explorer', commandTreeViewProvider);
+
+	const commandTreeViewInfoProvider = new G4MacroCommandInfoViewProvider();
+
+	context.subscriptions.push(
+	vscode.window.registerWebviewViewProvider(G4MacroCommandInfoViewProvider.viewType, commandTreeViewInfoProvider));
+
+
+	// Listen for selection changes
+	tree.onDidChangeSelection( e => {
+
+		if (e == undefined)
+			return;
+
+		const command = e.selection[0].g4command;
+
+		if (command == undefined)
+			return;
+
+		commandTreeViewInfoProvider.setCommand(command);
+	});
+
+	
 }
