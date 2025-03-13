@@ -3,6 +3,8 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import { g4macrocommands } from './g4macrocommands';
 import { G4MacroDefinitionProvider } from './G4MacroDefinitionProvider';
+import { G4MacroRenameProvider } from './G4MacroRenameProvider';
+import { rename } from 'fs';
 
 export function activate(context: vscode.ExtensionContext) {
 
@@ -20,6 +22,11 @@ export function activate(context: vscode.ExtensionContext) {
 	const definitionProvider = vscode.languages.registerDefinitionProvider(
 		'g4macro',
 		new G4MacroDefinitionProvider(commands)
+	);
+
+	const renameProvider = vscode.languages.registerRenameProvider(
+		'g4macro',
+		new G4MacroRenameProvider(commands)
 	);
 
 	const hoverProvider = vscode.languages.registerHoverProvider(
@@ -159,6 +166,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 	context.subscriptions.push(
 		definitionProvider,
+		renameProvider,
 		completionsProvider,
 		aliasProvider,
 		signatureInfoProvider,

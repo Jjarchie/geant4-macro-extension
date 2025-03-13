@@ -57,6 +57,7 @@ export class g4macrocommands {
     path: string = "";
     commands: Command = new Command();
     variables: Map<string, Variable> = new Map<string, Variable>();
+    diagnosticCollection: vscode.DiagnosticCollection | undefined = undefined;
 
     constructor(path: string) {
         this.path = path;
@@ -397,8 +398,6 @@ export class g4macrocommands {
 
         }
 
-        diagnosticCollection.set(doc.uri, diagnostics);
-
         this.variables = newVariables;
     }
 
@@ -464,6 +463,8 @@ export class g4macrocommands {
      * @param diagnosticCollection - The diagnostic collection to maintain.
      */
     public maintainDiagnostics(context: vscode.ExtensionContext, diagnosticCollection: vscode.DiagnosticCollection) {
+
+        this.diagnosticCollection = diagnosticCollection; 
 
         if (vscode.window.activeTextEditor) {
             this.refreshDiagnostics(vscode.window.activeTextEditor.document, diagnosticCollection);
