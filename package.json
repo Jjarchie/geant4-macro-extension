@@ -92,6 +92,10 @@
     "type": "git",
     "url": "https://github.com/Jjarchie/geant4-macro-extension"
   },
+  "bugs": {
+      "url": "https://github.com/Jjarchie/geant4-macro-extension/issues"
+  },
+  "homepage": "https://github.com/Jjarchie/geant4-macro-extension#readme",
   "keywords": [
     "geant4",
     "macro",
