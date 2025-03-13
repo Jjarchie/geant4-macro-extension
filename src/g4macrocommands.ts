@@ -399,6 +399,8 @@ export class g4macrocommands {
         }
 
         this.variables = newVariables;
+
+        diagnosticCollection.set(doc.uri, diagnostics);
     }
 
     public fillVariableInString(toFill: string) : string {
