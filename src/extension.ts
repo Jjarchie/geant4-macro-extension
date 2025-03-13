@@ -2,6 +2,7 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import { g4macrocommands } from './g4macrocommands';
+import { G4MacroDefinitionProvider } from './G4MacroDefinitionProvider';
 
 export function activate(context: vscode.ExtensionContext) {
 
@@ -15,6 +16,11 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(typeDiagnostics);
 
 	commands.maintainDiagnostics(context, typeDiagnostics);
+
+	const definitionProvider = vscode.languages.registerDefinitionProvider(
+		'g4macro',
+		new G4MacroDefinitionProvider(commands)
+	);
 
 	const hoverProvider = vscode.languages.registerHoverProvider(
 		'g4macro',
@@ -151,7 +157,13 @@ export function activate(context: vscode.ExtensionContext) {
 		' '
 	);
 
-	context.subscriptions.push(completionsProvider, aliasProvider, signatureInfoProvider, codeActionProvider, hoverProvider);
+	context.subscriptions.push(
+		definitionProvider,
+		completionsProvider,
+		aliasProvider,
+		signatureInfoProvider,
+		codeActionProvider,
+		hoverProvider);
 
 	// Register the command to add addtional UI commands to the registry
 	context.subscriptions.push(vscode.commands.registerCommand('geant4-macro-extension.addCommandFile', () => {

@@ -1,6 +1,7 @@
 
 import * as vscode from 'vscode';
 import { Command } from './command_reader';
+import { start } from 'repl';
 
 // Possible units that can be used
 const units = [
@@ -46,15 +47,16 @@ interface InputParameterInfo {
     end_idx: number;
 }
 
-interface Variable {
+export interface Variable {
     name: string;
     value: any;
+    location: vscode.Location
 }
 
 export class g4macrocommands {
     path: string = "";
     commands: Command = new Command();
-    variables: Array<Variable> = [];
+    variables: Map<string, Variable> = new Map<string, Variable>();
 
     constructor(path: string) {
         this.path = path;
@@ -209,10 +211,9 @@ export class g4macrocommands {
 
     public getVariableCompletions(): Array<vscode.CompletionItem> {
 
-        // Get list of the commands available
         const completionItems = [];
 
-        for (const variable of this.variables) {
+        for (const [, variable] of this.variables) {
             const thisItem: vscode.CompletionItem = {
                 label: variable.name,
                 kind: vscode.CompletionItemKind.Variable,
@@ -283,7 +284,7 @@ export class g4macrocommands {
      */
     public refreshDiagnostics(doc: vscode.TextDocument, diagnosticCollection: vscode.DiagnosticCollection) {
 
-        const newVariables: Array<Variable> = [];
+        const newVariables: Map<string, Variable> = new Map<string, Variable>();
 
         if (doc.languageId != "g4macro")
             return;
@@ -332,13 +333,24 @@ export class g4macrocommands {
             if (currentCommandParameters.length == 0)
                 continue;
 
-            if (lineCommand.path == "/control/alias") {
+            // Add the variable to the map
+            const definitionCommand: string = "/control/alias";
+
+            if (lineCommand.path == definitionCommand && currentParameters.length > 1) {              
+
+                const name = currentParameters[0].parameter;
+
                 const thisVariable: Variable = {
-                    name: currentParameters[0].parameter,
-                    value: (currentParameters.length > 1) ? currentParameters[1].parameter : null
+                    name: name,
+                    value: currentParameters[1].parameter,
+                    location: new vscode.Location(
+                        doc.uri,
+                        new vscode.Position(lineIndex, currentParameters[0].start_idx)
+                    )
                 };
 
-                newVariables.push(thisVariable);
+
+                newVariables.set(name, thisVariable);
             }
 
             // Check there are not too many arguments provided
@@ -383,6 +395,11 @@ export class g4macrocommands {
         diagnosticCollection.set(doc.uri, diagnostics);
 
         this.variables = newVariables;
+    }
+
+    public getVariable(variableName: string) : Variable | undefined {
+
+        return this.variables.get(variableName);
     }
 
 
