@@ -44,6 +44,27 @@ export class Command implements ICommand {
         });
     }
 
+    public search(searchTerm: string) : Command[] {
+
+        const results: Command[] = [];
+
+        for (const [, child] of this.children) {
+            
+            if (child.children.size == 0) {
+
+                if (child.path.indexOf(searchTerm) !== -1)
+                    results.push(child);
+            }
+            else {
+                const childResults = child.search(searchTerm);
+
+                results.push(...childResults);
+            }
+        }
+
+        return results;
+    }
+
     compare(a: Command, b: Command) : number  {
         return a.command.localeCompare(b.command);
     }

@@ -331,10 +331,9 @@ export function activate(context: vscode.ExtensionContext) {
 			if (!value) {
 				commandTreeViewProvider.clearSearchCommands();
 			} else {
-				const cmd = new Command();
-				cmd.command = value.toLowerCase();
+				const searchResults = commands.commands.search(value);
 
-				commandTreeViewProvider.setSearchCommands([cmd]);
+				commandTreeViewProvider.setSearchCommands(searchResults);
 				commandTreeViewProvider.refresh();
 			}
 		});

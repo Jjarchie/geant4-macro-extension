@@ -11,9 +11,12 @@ export class G4MacroCommandTreeItem extends vscode.TreeItem {
     g4command: Command | undefined = undefined;
     
     constructor(
-		command: Command
+		command: Command,
+        label: string | undefined = undefined
 	) {
-        const label = command.command;
+        if (label === undefined)
+            label = command.command;
+
         const collapsibleState = (command.children.size == 0) ? vscode.TreeItemCollapsibleState.None : vscode.TreeItemCollapsibleState.Collapsed; 
 		super(label, collapsibleState);
         
@@ -67,7 +70,7 @@ export class G4MacroCommandTreeDataProvider implements vscode.TreeDataProvider<G
             for (const childCommand of this.searchCommands) {
 
                 childItems.push(
-                    new G4MacroCommandTreeItem(childCommand)
+                    new G4MacroCommandTreeItem(childCommand, childCommand.path)
                 );
             
             }
