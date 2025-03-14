@@ -84,7 +84,7 @@ export class G4MacroCommandInfoViewProvider implements vscode.WebviewViewProvide
 
     private _getHtmlForWebview(): string {
 
-        const g4doc_string = `<div style="position: absolute; bottom: 0;"><hr style="height:1px%;"><p> For more information, refer to the <a href="https://geant4.web.cern.ch/docs/">Geant4 Documentation</a>. </p></div>`;
+        const g4doc_string = `<div class="bottom-paragraph"><hr style="height:1px%;"><p> For more information, refer to the <a href="https://geant4.web.cern.ch/docs/">Geant4 Documentation</a>. </p></div>`;
 
         if (this.command == undefined) {
             return `<html><p>No command or directory selected...</p>${g4doc_string}</html>`;
@@ -99,7 +99,7 @@ export class G4MacroCommandInfoViewProvider implements vscode.WebviewViewProvide
         }
 
         if (this.command.parameters.length > 0) {
-            htmlString += `<table width="100%" style="margin: 0px; text-align: left;">\n<tr><th>Parameter</th><th>Type</th><th>Candidates</th></tr>`;
+            htmlString += `<table>\n<tr><th>Parameter</th><th>Type</th><th>Candidates</th></tr>`;
 
             for (const parameter of this.command.parameters) {
                 const candidates = (parameter.candidates == undefined) ? "-" : parameter.candidates;
@@ -111,7 +111,48 @@ export class G4MacroCommandInfoViewProvider implements vscode.WebviewViewProvide
             }
             
 
-        htmlString = "<html>\n" + htmlString + "\n<p></p>" + g4doc_string + "</html>";
+        htmlString = `<html>
+        <style>
+            
+            body, html {
+                height: 100%;
+                display: flex;
+                flex-direction: column;
+            }
+
+            table {
+                width: 100%;
+                table-layout: auto;
+                border-collapse: collapse;
+                margin-bottom: 10px;
+                margin: 0px;
+                text-align: left;
+                flex: 1;
+            }
+
+            th, td, tr {
+                word-wrap: break-word;
+                word-break: break-word;
+                max-width: 200px;
+                vertical-align: top;
+            }
+
+            td {
+                white-space: normal;
+            }
+
+            .bottom-paragraph {
+                margin-top: auto;
+                text-align: center;
+            }
+
+
+        </style>
+
+        ${htmlString} 
+        <p></p> 
+        ${g4doc_string} 
+        </html>`;
 
         return htmlString;
     }
