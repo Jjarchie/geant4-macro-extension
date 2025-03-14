@@ -22,7 +22,11 @@
         "extensions": [
           ".mac"
         ],
-        "configuration": "./language-configuration.json"
+        "configuration": "./language-configuration.json",
+        "icon": {
+          "dark": "./images/geant4_logo_dark.svg",
+          "light": "./images/geant4_logo_light.svg"
+        }
       }
     ],
     "grammars": [
@@ -39,7 +43,8 @@
       },
       {
         "command": "geant4-macro-extension.refreshCommands",
-        "title": "Geant4 Macro: Refresh Commands"
+        "title": "Geant4 Macro: Refresh Commands",
+        "icon": "$(refresh)"
       },
       {
         "command": "geant4-macro-extension.removeCommandFile",
@@ -47,7 +52,18 @@
       },
       {
         "command": "geant4-macro-extension.addCommand",
-        "title": "Geant4 Macro: Add command..."
+        "title": "Geant4 Macro: Add command...",
+        "icon": "$(add)"
+      },
+      {
+        "command": "geant4-macro-extension.searchTree",
+        "title": "Geant4 Macro: Search commands...",
+        "icon": "$(search)"
+      },
+      {
+        "command": "geant4-macro-extension.insertCommand",
+        "title": "Geant4 Macro: Insert command...",
+        "icon": "$(arrow-right)"
       }
     ],
     "configuration": {
@@ -70,6 +86,54 @@
           }
         }
       }
+    },
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "geant4-macro-bar",
+          "title": "Geant4 Macro",
+          "icon": "images/geant4_logo.svg"
+        }
+      ]
+    },
+    "views": {
+      "geant4-macro-bar": [
+        {
+          "id": "geant4-macro-explorer",
+          "name": "Command Explorer"
+        },
+        {
+          "type": "webview",
+          "id": "geant4-macro-active-command",
+          "name": "Command"
+        }
+      ]
+    },
+    "menus": {
+      "view/title": [
+        {
+          "command": "geant4-macro-extension.searchTree",
+          "when": "view == geant4-macro-explorer",
+          "group": "navigation"
+        },
+        {
+          "command": "geant4-macro-extension.addCommand",
+          "when": "view == geant4-macro-explorer",
+          "group": "navigation"
+        },
+        {
+          "command": "geant4-macro-extension.refreshCommands",
+          "when": "view == geant4-macro-explorer",
+          "group": "navigation"
+        }
+      ],
+      "view/item/context": [
+      {
+        "command": "geant4-macro-extension.insertCommand",
+        "when": "view == geant4-macro-explorer && viewItem == commandTreeItemNotDir",
+        "group": "inline"
+      }
+    ]
     }
   },
   "activationEvents": [],

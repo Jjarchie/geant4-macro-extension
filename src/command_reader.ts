@@ -32,6 +32,9 @@ export class Command implements ICommand {
     parameters: Parameter[] = [];
     children: Map<string, Command> = new Map<string, Command>();
 
+    private _onDidFinishReading = new vscode.EventEmitter<void>();
+    public readonly onDidFinishReading = this._onDidFinishReading.event;
+
     constructor() {
         Object.defineProperties(this, {
             command: { enumerable: true },
@@ -41,12 +44,47 @@ export class Command implements ICommand {
         });
     }
 
-    getSnippetString(): vscode.SnippetString | undefined {
+    public search(searchTerm: string) : Command[] {
+
+        const results: Command[] = [];
+
+        for (const [, child] of this.children) {
+            
+            if (child.children.size == 0) {
+
+                if (child.path.indexOf(searchTerm) !== -1)
+                    results.push(child);
+            }
+            else {
+                const childResults = child.search(searchTerm);
+
+                results.push(...childResults);
+            }
+        }
+
+        return results;
+    }
+
+    compare(a: Command, b: Command) : number  {
+        return a.command.localeCompare(b.command);
+    }
+
+    public sortChildren() {
+
+        this.children = new Map([...this.children.entries()].sort());
+
+        for (const [, child] of this.children) {
+            child.sortChildren();
+        }
+    }
+
+    getSnippetString(addCommandToSnippet: boolean=true): vscode.SnippetString | undefined {
 
         if (this.parameters.length == 0)
             return undefined;
 
-        const snippet = new vscode.SnippetString(this.command);
+        const baseString = (addCommandToSnippet) ? this.command : "";
+        const snippet = new vscode.SnippetString(baseString);
 
         snippet.appendText(" ");
 
@@ -59,7 +97,7 @@ export class Command implements ICommand {
                     snippet.appendChoice(parameter.candidates);
 
             else if (parameter.omittable)
-                snippet.appendPlaceholder(" ");
+                snippet.appendPlaceholder("");
             else
                 snippet.appendPlaceholder(parameter.name);
 
@@ -132,6 +170,7 @@ export class Command implements ICommand {
         const commandSpecifier = "Command /";
 
         let currentCommand: Command | null = null;
+        let baseCommand: Command | null = null;
         let commandPathSplit: string[] = [];
         let commandPath: string = "";
 
@@ -166,6 +205,9 @@ export class Command implements ICommand {
                 currentCommand = new Command();
                 currentCommand.command = commandPathSplit[commandPathSplit.length - 1];
                 currentCommand.path = commandPath;
+
+                if (baseCommand == null)
+                    baseCommand = currentCommand;
 
                 this.addCommand(commandPath, currentCommand);
             }
@@ -219,6 +261,13 @@ export class Command implements ICommand {
             }
 
         });
+
+        // Update things that are required on close as the read is asynchronous
+        reader.on("close", () => {
+            // Notify listeners that we finished reading
+            this._onDidFinishReading.fire(); 
+        });
+
 
     }
 }

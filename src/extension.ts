@@ -4,7 +4,10 @@ import * as path from 'path';
 import { g4macrocommands } from './g4macrocommands';
 import { G4MacroDefinitionProvider } from './G4MacroDefinitionProvider';
 import { G4MacroRenameProvider } from './G4MacroRenameProvider';
+import { G4MacroCommandTreeDataProvider, G4MacroCommandTreeItem } from './G4MacroCommandTreeView';
+import { G4MacroCommandInfoViewProvider } from './G4MacroCommandInfoView';
 import { rename } from 'fs';
+import { Command } from './command_reader';
 
 export function activate(context: vscode.ExtensionContext) {
 
@@ -46,8 +49,6 @@ export function activate(context: vscode.ExtensionContext) {
 				);
 
 				const hoverPrefix = document.getText(commandRange);
-
-				console.log(hoverPrefix);
 
 				// Get the command being hovered
 				const command = commands.getCurrentCommand(hoverPrefix);
@@ -246,4 +247,109 @@ export function activate(context: vscode.ExtensionContext) {
 
 
 	}));
+
+	// Maintain the views
+	const commandTreeViewProvider = new G4MacroCommandTreeDataProvider(commands);
+	const tree = vscode.window.createTreeView('geant4-macro-explorer', {treeDataProvider: commandTreeViewProvider, showCollapseAll: true });
+	// vscode.window.registerTreeDataProvider('geant4-macro-explorer', commandTreeViewProvider);
+
+	const commandTreeViewInfoProvider = new G4MacroCommandInfoViewProvider();
+
+	context.subscriptions.push(
+	vscode.window.registerWebviewViewProvider(G4MacroCommandInfoViewProvider.viewType, commandTreeViewInfoProvider));
+
+	// Listen for selection changes
+	tree.onDidChangeSelection( e => {
+
+		if (e == undefined)
+			return;
+
+		const command = e.selection[0].g4command;
+
+		if (command == undefined)
+			return;
+
+		commandTreeViewInfoProvider.setCommand(command);
+	});
+
+	// Register insertion commands from the tree
+	const insertCommand = vscode.commands.registerCommand(
+		'geant4-macro-extension.insertCommand', (treeItem: G4MacroCommandTreeItem) => {
+
+			// Get the current document
+			const editor = vscode.window.activeTextEditor;
+			
+			if (!editor) {
+				vscode.window.showErrorMessage("No active editor found!");
+				return;
+			}
+
+			const document = editor.document;
+
+			// Check if the document is of the correct type
+			if (document.languageId !== "g4macro") {  // Change to your desired language
+				vscode.window.showErrorMessage("Currently active file is not a Geant4 Macro file!");
+				return;
+			}
+
+			// Get the last cursor position
+			const lastCursorPos = editor.selection.active;
+			const command = treeItem.g4command;
+
+			if (command == undefined) {
+				vscode.window.showErrorMessage("Tree item does not have associated command!");
+				return;
+			}
+
+			// Add the snippet and get hints
+			const snippet = command.getSnippetString(false);
+
+			if (snippet == undefined)
+				return;
+
+			snippet.value = command.path + snippet.value;
+			editor.insertSnippet(snippet, lastCursorPos);
+			vscode.commands.executeCommand('editor.action.triggerParameterHints');
+
+		}
+			
+	);
+
+	context.subscriptions.push(insertCommand);
+
+	// Create the search command which modifies the command tree UI
+	const searchCommand = vscode.commands.registerCommand("geant4-macro-extension.searchTree", async () => {
+
+		// Create a QuickPick
+		const quickPick = vscode.window.createQuickPick();
+		quickPick.placeholder = "Type to search tree items...";
+		quickPick.ignoreFocusOut = true;
+		quickPick.title = "Geant4 Command Search";
+
+		// Update search values dynamically
+		quickPick.onDidChangeValue((value) => {
+			if (!value) {
+				commandTreeViewProvider.clearSearchCommands();
+			} else {
+				const searchResults = commands.commands.search(value);
+
+				commandTreeViewProvider.setSearchCommands(searchResults);
+				commandTreeViewProvider.refresh();
+			}
+		});
+
+		// Clear values when done
+		quickPick.onDidHide(() => {
+			quickPick.dispose();
+			
+			commandTreeViewProvider.clearSearchCommands();
+			commandTreeViewProvider.refresh();
+		});
+
+		quickPick.show();
+	});
+
+	context.subscriptions.push(searchCommand);
+
+	
 }

@@ -63,6 +63,10 @@ export class g4macrocommands {
         this.path = path;
 
         this.refreshCommands();
+
+        this.commands.onDidFinishReading(() => {
+            this.sortCommands();
+        });
     }
 
     /**
@@ -569,6 +573,20 @@ export class g4macrocommands {
 
         for (const additionalCommand of additionalCommands)
             this.commands.addCommand(additionalCommand);
+
+        console.log("commands refreshed!");
+
+        for (const child of this.commands.children) {
+            console.log(child);
+        }
+
+        this.sortCommands();
+
+    }
+
+    public sortCommands() {
+
+        this.commands.sortChildren();
 
     }
 
