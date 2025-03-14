@@ -44,12 +44,13 @@ export class Command implements ICommand {
         });
     }
 
-    getSnippetString(): vscode.SnippetString | undefined {
+    getSnippetString(addCommandToSnippet: boolean=true): vscode.SnippetString | undefined {
 
         if (this.parameters.length == 0)
             return undefined;
 
-        const snippet = new vscode.SnippetString(this.command);
+        const baseString = (addCommandToSnippet) ? this.command : "";
+        const snippet = new vscode.SnippetString(baseString);
 
         snippet.appendText(" ");
 

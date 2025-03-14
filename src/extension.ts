@@ -302,10 +302,16 @@ export function activate(context: vscode.ExtensionContext) {
 				return;
 			}
 
-			// Apply edit
-			editor.edit(editBuilder => {
-				editBuilder.insert(lastCursorPos, command.path);
-			});
+			// Add the snippet and get hints
+			const snippet = command.getSnippetString(false);
+
+			if (snippet == undefined)
+				return;
+
+			snippet.value = command.path + snippet.value;
+			editor.insertSnippet(snippet, lastCursorPos);
+			vscode.commands.executeCommand('editor.action.triggerParameterHints');
+
 		}
 
 			
