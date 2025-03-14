@@ -39,7 +39,8 @@
       },
       {
         "command": "geant4-macro-extension.refreshCommands",
-        "title": "Geant4 Macro: Refresh Commands"
+        "title": "Geant4 Macro: Refresh Commands",
+        "icon": "$(refresh)"
       },
       {
         "command": "geant4-macro-extension.removeCommandFile",
@@ -47,7 +48,8 @@
       },
       {
         "command": "geant4-macro-extension.addCommand",
-        "title": "Geant4 Macro: Add command..."
+        "title": "Geant4 Macro: Add command...",
+        "icon": "$(add)"
       }
     ],
     "configuration": {
@@ -90,6 +92,20 @@
           "type": "webview",
           "id": "geant4-macro-active-command",
           "name": "Command"
+        }
+      ]
+    },
+    "menus": {
+      "view/title": [
+        {
+          "command": "geant4-macro-extension.addCommand",
+          "when": "view == geant4-macro-explorer",
+          "group": "navigation"
+        },
+        {
+          "command": "geant4-macro-extension.refreshCommands",
+          "when": "view == geant4-macro-explorer",
+          "group": "navigation"
         }
       ]
     }
