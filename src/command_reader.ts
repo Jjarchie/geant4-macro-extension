@@ -44,6 +44,19 @@ export class Command implements ICommand {
         });
     }
 
+    compare(a: Command, b: Command) : number  {
+        return a.command.localeCompare(b.command);
+    }
+
+    public sortChildren() {
+
+        this.children = new Map([...this.children.entries()].sort());
+
+        for (const [, child] of this.children) {
+            child.sortChildren();
+        }
+    }
+
     getSnippetString(addCommandToSnippet: boolean=true): vscode.SnippetString | undefined {
 
         if (this.parameters.length == 0)
@@ -136,6 +149,7 @@ export class Command implements ICommand {
         const commandSpecifier = "Command /";
 
         let currentCommand: Command | null = null;
+        let baseCommand: Command | null = null;
         let commandPathSplit: string[] = [];
         let commandPath: string = "";
 
@@ -170,6 +184,9 @@ export class Command implements ICommand {
                 currentCommand = new Command();
                 currentCommand.command = commandPathSplit[commandPathSplit.length - 1];
                 currentCommand.path = commandPath;
+
+                if (baseCommand == null)
+                    baseCommand = currentCommand;
 
                 this.addCommand(commandPath, currentCommand);
             }
