@@ -325,6 +325,8 @@ export function activate(context: vscode.ExtensionContext) {
 		// Create a QuickPick
 		const quickPick = vscode.window.createQuickPick();
 		quickPick.placeholder = "Type to search tree items...";
+		quickPick.ignoreFocusOut = true;
+		quickPick.title = "Geant4 Command Search";
 
 		// Update search values dynamically
 		quickPick.onDidChangeValue((value) => {
