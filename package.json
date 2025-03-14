@@ -56,6 +56,11 @@
         "icon": "$(add)"
       },
       {
+        "command": "geant4-macro-extension.searchTree",
+        "title": "Geant4 Macro: Search commands...",
+        "icon": "$(search)"
+      },
+      {
         "command": "geant4-macro-extension.insertCommand",
         "title": "Geant4 Macro: Insert command...",
         "icon": "$(arrow-right)"
@@ -106,6 +111,11 @@
     },
     "menus": {
       "view/title": [
+        {
+          "command": "geant4-macro-extension.searchTree",
+          "when": "view == geant4-macro-explorer",
+          "group": "navigation"
+        },
         {
           "command": "geant4-macro-extension.addCommand",
           "when": "view == geant4-macro-explorer",

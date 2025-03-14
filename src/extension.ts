@@ -7,6 +7,7 @@ import { G4MacroRenameProvider } from './G4MacroRenameProvider';
 import { G4MacroCommandTreeDataProvider, G4MacroCommandTreeItem } from './G4MacroCommandTreeView';
 import { G4MacroCommandInfoViewProvider } from './G4MacroCommandInfoView';
 import { rename } from 'fs';
+import { Command } from './command_reader';
 
 export function activate(context: vscode.ExtensionContext) {
 
@@ -313,11 +314,43 @@ export function activate(context: vscode.ExtensionContext) {
 			vscode.commands.executeCommand('editor.action.triggerParameterHints');
 
 		}
-
 			
 	);
 
 	context.subscriptions.push(insertCommand);
+
+	// Create the search command which modifies the command tree UI
+	const searchCommand = vscode.commands.registerCommand("geant4-macro-extension.searchTree", async () => {
+
+		// Create a QuickPick
+		const quickPick = vscode.window.createQuickPick();
+		quickPick.placeholder = "Type to search tree items...";
+
+		// Update search values dynamically
+		quickPick.onDidChangeValue((value) => {
+			if (!value) {
+				commandTreeViewProvider.clearSearchCommands();
+			} else {
+				const cmd = new Command();
+				cmd.command = value.toLowerCase();
+
+				commandTreeViewProvider.setSearchCommands([cmd]);
+				commandTreeViewProvider.refresh();
+			}
+		});
+
+		// Clear values when done
+		quickPick.onDidHide(() => {
+			quickPick.dispose();
+			
+			commandTreeViewProvider.clearSearchCommands();
+			commandTreeViewProvider.refresh();
+		});
+
+		quickPick.show();
+	});
+
+	context.subscriptions.push(searchCommand);
 
 	
 }

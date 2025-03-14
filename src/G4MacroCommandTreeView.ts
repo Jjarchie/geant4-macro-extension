@@ -50,6 +50,10 @@ export class G4MacroCommandTreeDataProvider implements vscode.TreeDataProvider<G
     setSearchCommands(cmds: Command[]) {
         this.searchCommands = cmds;
     }
+
+    clearSearchCommands() {
+        this.searchCommands = [];
+    }
     
     getTreeItem(element: G4MacroCommandTreeItem): vscode.TreeItem {
 		return element;
