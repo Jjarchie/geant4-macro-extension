@@ -37,6 +37,7 @@ export class G4MacroCommandTreeDataProvider implements vscode.TreeDataProvider<G
     private macroCommands: g4macrocommands | undefined = undefined;
     private _onDidChangeTreeData = new vscode.EventEmitter<void>();
     readonly onDidChangeTreeData = this._onDidChangeTreeData.event;
+    private searchCommands: Command[] = [];
 
     constructor(theMacroCommands: g4macrocommands) {
         this.macroCommands = theMacroCommands;
@@ -45,6 +46,10 @@ export class G4MacroCommandTreeDataProvider implements vscode.TreeDataProvider<G
             this.refresh();
         });
     }
+
+    setSearchCommands(cmds: Command[]) {
+        this.searchCommands = cmds;
+    }
     
     getTreeItem(element: G4MacroCommandTreeItem): vscode.TreeItem {
 		return element;
@@ -52,16 +57,28 @@ export class G4MacroCommandTreeDataProvider implements vscode.TreeDataProvider<G
 
     getChildren(element?: G4MacroCommandTreeItem): Thenable<G4MacroCommandTreeItem[]> {
 
+        const childItems: G4MacroCommandTreeItem[] = [];
+
+        if (this.searchCommands.length != 0) {
+            for (const childCommand of this.searchCommands) {
+
+                childItems.push(
+                    new G4MacroCommandTreeItem(childCommand)
+                );
+            
+            }
+
+            return Promise.resolve(childItems);
+        }
+
         if (this.macroCommands == undefined)
             return Promise.resolve([]);
 
         const currentCommand: Command | undefined = (element == undefined) ? this.macroCommands.commands : element.g4command;
-        const childItems: G4MacroCommandTreeItem[] = [];
+        
 
         if (currentCommand == undefined)
             return Promise.resolve([]);
-
-        console.log(currentCommand.children.size + ' children');
 
         for (const [, childCommand] of currentCommand.children) {
 
