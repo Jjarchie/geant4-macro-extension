@@ -50,6 +50,11 @@
         "command": "geant4-macro-extension.addCommand",
         "title": "Geant4 Macro: Add command...",
         "icon": "$(add)"
+      },
+      {
+        "command": "geant4-macro-extension.insertCommand",
+        "title": "Geant4 Macro: Insert command...",
+        "icon": "$(arrow-right)"
       }
     ],
     "configuration": {
@@ -107,7 +112,14 @@
           "when": "view == geant4-macro-explorer",
           "group": "navigation"
         }
-      ]
+      ],
+      "view/item/context": [
+      {
+        "command": "geant4-macro-extension.insertCommand",
+        "when": "view == geant4-macro-explorer && viewItem == commandTreeItemNotDir",
+        "group": "inline"
+      }
+    ]
     }
   },
   "activationEvents": [],

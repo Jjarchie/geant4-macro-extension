@@ -18,7 +18,12 @@ export class G4MacroCommandTreeItem extends vscode.TreeItem {
 		super(label, collapsibleState);
         
         this.g4command = command;
+
+        if (command.children.size == 0)
+            this.contextValue = 'commandTreeItemNotDir';
 	}
+
+    contextValue = 'commandTreeItem';
 
 }
 

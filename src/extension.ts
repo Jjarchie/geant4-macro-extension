@@ -4,7 +4,7 @@ import * as path from 'path';
 import { g4macrocommands } from './g4macrocommands';
 import { G4MacroDefinitionProvider } from './G4MacroDefinitionProvider';
 import { G4MacroRenameProvider } from './G4MacroRenameProvider';
-import { G4MacroCommandTreeDataProvider } from './G4MacroCommandTreeView';
+import { G4MacroCommandTreeDataProvider, G4MacroCommandTreeItem } from './G4MacroCommandTreeView';
 import { G4MacroCommandInfoViewProvider } from './G4MacroCommandInfoView';
 import { rename } from 'fs';
 
@@ -259,7 +259,6 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(
 	vscode.window.registerWebviewViewProvider(G4MacroCommandInfoViewProvider.viewType, commandTreeViewInfoProvider));
 
-
 	// Listen for selection changes
 	tree.onDidChangeSelection( e => {
 
@@ -273,6 +272,46 @@ export function activate(context: vscode.ExtensionContext) {
 
 		commandTreeViewInfoProvider.setCommand(command);
 	});
+
+	// Register insertion commands from the tree
+	const insertCommand = vscode.commands.registerCommand(
+		'geant4-macro-extension.insertCommand', (treeItem: G4MacroCommandTreeItem) => {
+
+			// Get the current document
+			const editor = vscode.window.activeTextEditor;
+			
+			if (!editor) {
+				vscode.window.showErrorMessage("No active editor found!");
+				return;
+			}
+
+			const document = editor.document;
+
+			// Check if the document is of the correct type
+			if (document.languageId !== "g4macro") {  // Change to your desired language
+				vscode.window.showErrorMessage("Currently active file is not a Geant4 Macro file!");
+				return;
+			}
+
+			// Get the last cursor position
+			const lastCursorPos = editor.selection.active;
+			const command = treeItem.g4command;
+
+			if (command == undefined) {
+				vscode.window.showErrorMessage("Tree item does not have associated command!");
+				return;
+			}
+
+			// Apply edit
+			editor.edit(editBuilder => {
+				editBuilder.insert(lastCursorPos, command.path);
+			});
+		}
+
+			
+	);
+
+	context.subscriptions.push(insertCommand);
 
 	
 }
