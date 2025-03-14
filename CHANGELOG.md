@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [0.3.0] - 2025-03-14
+## [0.4.0] - 2025-03-14
 
 ### Added
 - Implemented a view in the sidebar for showing available commands, information, basic search and quickly adding them into an open macro file.
