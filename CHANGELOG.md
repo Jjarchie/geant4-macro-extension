@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 ## [0.3.0] - 2025-03-14
 
 ### Added
-- Implemented a view in the sidebar for showing available commands, information and adding them directly to a macro file.
+- Implemented a view in the sidebar for showing available commands, information, basic search and quickly adding them into an open macro file.
 - Created icons for Geant4 macro files (both dark and light mode) and sidebar.
 - Sorting of commands in alphabetical order.
 
