@@ -19,8 +19,13 @@ export class G4MacroCommandTreeItem extends vscode.TreeItem {
         
         this.g4command = command;
 
-        if (command.children.size == 0)
+        if (command.children.size == 0) {
             this.contextValue = 'commandTreeItemNotDir';
+            this.iconPath = new vscode.ThemeIcon('symbol-method');
+        }
+        else {
+            this.iconPath = new vscode.ThemeIcon('symbol-class');
+        }
 	}
 
     contextValue = 'commandTreeItem';
