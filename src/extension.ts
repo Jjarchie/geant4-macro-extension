@@ -50,8 +50,6 @@ export function activate(context: vscode.ExtensionContext) {
 
 				const hoverPrefix = document.getText(commandRange);
 
-				console.log(hoverPrefix);
-
 				// Get the command being hovered
 				const command = commands.getCurrentCommand(hoverPrefix);
 
