@@ -22,7 +22,11 @@
         "extensions": [
           ".mac"
         ],
-        "configuration": "./language-configuration.json"
+        "configuration": "./language-configuration.json",
+        "icon": {
+          "dark": "./images/geant4_logo_dark.svg",
+          "light": "./images/geant4_logo_light.svg"
+        }
       }
     ],
     "grammars": [
