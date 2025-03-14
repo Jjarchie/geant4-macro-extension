@@ -63,7 +63,7 @@ export class Command implements ICommand {
                     snippet.appendChoice(parameter.candidates);
 
             else if (parameter.omittable)
-                snippet.appendPlaceholder(" ");
+                snippet.appendPlaceholder("");
             else
                 snippet.appendPlaceholder(parameter.name);
 
