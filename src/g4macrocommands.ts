@@ -316,13 +316,29 @@ export class g4macrocommands {
 
             // Get the current parameters
             const currentParameters = this.getInputParameters(lineOfText);
-
-            if (currentParameters.length == 0)
-                continue;
-
             const currentCommandParameters = lineCommand.parameters;
 
-            if (currentCommandParameters.length == 0)
+            // Check if there are too few arguments
+            let numberNonOmittable = 0;
+
+            for (const parameter of currentCommandParameters) {
+                if (parameter.omittable)
+                    break;
+
+                ++numberNonOmittable;
+            }
+
+            if (currentParameters.length < numberNonOmittable) {
+                diagnostics.push(
+                    new vscode.Diagnostic(
+                        line.range, "Too few arguments!", vscode.DiagnosticSeverity.Error
+                    )
+                );
+
+                continue;
+            }
+
+            if (currentCommandParameters.length == 0 || currentParameters.length == 0)
                 continue;
 
             // Add the variable to the map
