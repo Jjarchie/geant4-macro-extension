@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [0.4.0] - 2025-03-14
+## [0.4.0] - 2025-03-15
 
 ### Added
 - Implemented a view in the sidebar for showing available commands, information, basic search and quickly adding them into an open macro file.
@@ -12,6 +12,7 @@ All notable changes to this project will be documented in this file.
 ### Fixed
 - An error due to an incorrect number of parameters will no longer show when using quotation marks in parameters and using comments inline.
 - A minor bug was rectified where the completion dialogue shows the second parameter highlighted rather than the first one when a new macro command is entered.
+- A warning now shows when no arguments are supplied to a command and the command requires non-omittable arguments.
 
 ## [0.2.0] - 2025-03-13
 
