@@ -9,7 +9,11 @@ import { G4MacroCommandInfoViewProvider } from './G4MacroCommandInfoView';
 import { rename } from 'fs';
 import { Command } from './command_reader';
 
+// vscode.commands.executeCommand("setContext", "extensionActivated", false);
+
 export function activate(context: vscode.ExtensionContext) {
+
+	vscode.commands.executeCommand('setContext', "geant4-macro-extension:enableFullFeatureSet", true);
 
 	// Import the completions JSON
 	const completionsPath = path.join(context.extensionPath, 'command_output.txt');

@@ -2,7 +2,7 @@
   "name": "geant4-macro-extension",
   "displayName": "Geant4 Macro Extension",
   "description": "Syntax highlighting and auto-complete for Geant4 macro files",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "icon": "images/icon.png",
   "publisher": "Jjarchie",
   "engines": {
@@ -92,7 +92,8 @@
         {
           "id": "geant4-macro-bar",
           "title": "Geant4 Macro",
-          "icon": "images/geant4_logo.svg"
+          "icon": "images/geant4_logo.svg",
+          "when": "geant4-macro-extension:enableFullFeatureSet"
         }
       ]
     },
@@ -100,12 +101,14 @@
       "geant4-macro-bar": [
         {
           "id": "geant4-macro-explorer",
-          "name": "Command Explorer"
+          "name": "Command Explorer",
+          "when": "geant4-macro-extension:enableFullFeatureSet"
         },
         {
           "type": "webview",
           "id": "geant4-macro-active-command",
-          "name": "Command"
+          "name": "Command",
+          "when": "geant4-macro-extension:enableFullFeatureSet"
         }
       ]
     },
@@ -113,17 +116,17 @@
       "view/title": [
         {
           "command": "geant4-macro-extension.searchTree",
-          "when": "view == geant4-macro-explorer",
+          "when": "view == geant4-macro-explorer && geant4-macro-extension:enableFullFeatureSet",
           "group": "navigation"
         },
         {
           "command": "geant4-macro-extension.addCommand",
-          "when": "view == geant4-macro-explorer",
+          "when": "view == geant4-macro-explorer && geant4-macro-extension:enableFullFeatureSet",
           "group": "navigation"
         },
         {
           "command": "geant4-macro-extension.refreshCommands",
-          "when": "view == geant4-macro-explorer",
+          "when": "view == geant4-macro-explorer && geant4-macro-extension:enableFullFeatureSet",
           "group": "navigation"
         }
       ],
