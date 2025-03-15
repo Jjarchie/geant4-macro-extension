@@ -80,41 +80,21 @@ export class g4macrocommands {
         // Initialise the array
         const parameters: InputParameterInfo[] = [];
 
-        // Initialise the running variables
-        let startIdx = -1;
-        let endIdx = -1;
+        // The regex for getting the parameters
+        const regex = /"([^"]*)"|\S+/g;
+        
+        // Skip the first token (the command)
+        let match = regex.exec(line);
 
-        // Check for start and end of parameters
-        for (let charNum = 0; charNum < line.length - 1; charNum++) {
-            // If this is whitespace and the next is not then it is the start of a character
-            if (isWhitespace(line[charNum]) && !isWhitespace(line[charNum + 1])) {
-                startIdx = charNum + 1;
-            }
+        // Get all subsequent tokens
+        while ((match = regex.exec(line)) !== null) {
 
-            // If this is not whitespace and the next is then it is the end
-            if (!isWhitespace(line[charNum]) && isWhitespace(line[charNum + 1])) {
-                endIdx = charNum;
+            // Add to the parameters list
+            const thisMatch = match[0];            
+            const start = match.index;
+            const end = start + thisMatch.length;
 
-                if (startIdx < 0)
-                    continue;
-
-                parameters.push({
-                    parameter: line.slice(startIdx, endIdx + 1),
-                    start_idx: startIdx,
-                    end_idx: endIdx
-                });
-            }
-        }
-
-        // Add the last parameter if it was not detected
-        if (endIdx < startIdx) {
-            endIdx = line.length - 1;
-
-            parameters.push({
-                parameter: line.slice(startIdx, endIdx + 1),
-                start_idx: startIdx,
-                end_idx: endIdx
-            });
+            parameters.push({ parameter: thisMatch, start_idx: start, end_idx: end });
         }
 
         return parameters;
