@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.4.1] - 2025-03-16
+
+### Fixed
+- Made sidebar logo consistent with other logos (was missing one arm).
+
 ## [0.4.0] - 2025-03-15
 
 ### Added
